@@ -1,0 +1,20 @@
+CAMPO - Teste de Bandeja (pacote de instalação)
+
+O que tem aqui
+- index.html ............ o aplicativo inteiro
+- manifest.webmanifest, sw.js, icon-192.png, icon-512.png ... arquivos que permitem INSTALAR o app no celular e usá-lo sem internet (exceto o mapa com imagens)
+
+IMPORTANTE
+Este pacote NÃO é um arquivo .apk. O Android só oferece "Instalar app" para páginas abertas por um endereço https. Por isso o pacote precisa ficar em algum endereço web, mesmo que seja só seu.
+
+Caminho sem GitHub (um serviço de hospedagem de arquivos estáticos, por exemplo Netlify Drop ou Cloudflare Pages):
+1. Descompacte este .zip e envie a PASTA "campo-app" inteira para o serviço (o Netlify Drop aceita arrastar a pasta).
+2. O serviço devolve um endereço https. Abra esse endereço no Chrome do celular.
+3. Menu do Chrome (três pontos) > "Instalar app" (ou "Adicionar à tela inicial").
+4. Abra pelo ícone "Campo". Na Coleta de pontos, toque em "Iniciar coleta" e permita a localização.
+
+Seus dados atuais
+Os equipamentos e testes cadastrados no link do claude.ai NÃO vão junto para o novo endereço. Antes de mudar, abra o app antigo > "Backup dos dados" > "Salvar arquivo de backup" (ou "Copiar backup como texto"). No app novo, use "Backup dos dados" > "Importar".
+
+Sem hospedagem (alternativa limitada)
+Dá para abrir o index.html direto do celular, mas não é garantido que o GPS funcione e o app não fica instalado.
