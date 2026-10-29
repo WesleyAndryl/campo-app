@@ -275,4 +275,8 @@ ${dl!==null?`<p style="margin:4px 0 0">Teste anterior: ${F(prev.main,2)}% → <b
 <button class="btn" onclick="saveT()">Salvar teste no histórico</button>`}
 function saveT(){if(!cur)return;S.tests.push(cur);save();go("machine",cur.mid)}
 home();
-</script><script>if("serviceWorker"in navigator&&location.protocol.indexOf("http")==0)navigator.serviceWorker.register("sw.js").catch(function(){});</script></body></html>
+</script><script>(function(){if(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)return;var el=document.createElement("div");el.style.cssText="font:12px system-ui,sans-serif;text-align:center;padding:14px;color:#94a3b8";document.body.appendChild(el);var dp=null,sw="verificando",mf="verificando";
+function draw(){el.innerHTML="Instalação: manifesto "+mf+" · service worker "+sw+" · instalável pelo Chrome: "+(dp?"sim":"ainda não")+(dp?'<br><button id="ibtn" style="margin-top:8px;padding:10px 16px;border:0;border-radius:10px;background:#10b981;color:#fff;font-weight:700;font-size:15px">Instalar app</button>':"");var b=document.getElementById("ibtn");if(b)b.onclick=function(){dp.prompt();dp.userChoice.then(function(){dp=null;draw()})}}
+window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();dp=e;draw()});window.addEventListener("appinstalled",function(){el.remove()});
+(window.fetch?fetch("manifest.webmanifest"):Promise.reject()).then(function(r){mf=r.ok?"ok":"erro "+r.status;draw()}).catch(function(){mf="erro";draw()});
+if("serviceWorker"in navigator&&location.protocol.indexOf("http")==0){navigator.serviceWorker.register("sw.js").then(function(){return navigator.serviceWorker.ready}).then(function(){sw="ativo";draw()}).catch(function(){sw="erro";draw()})}else{sw="indisponível";draw()}draw()})();</script></body></html>
