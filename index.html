@@ -22,6 +22,24 @@ input,select{width:100%;box-sizing:border-box;font-size:16px;padding:10px;margin
 .tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}.tile{aspect-ratio:1;background:var(--card);border:1px solid var(--line);border-radius:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:12px;text-align:center;cursor:pointer;font-size:14px;line-height:1.25}.tile svg{width:52%;max-width:92px;stroke:var(--ac);fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
 .big{font-size:34px;font-weight:800}
 .mi{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);color:var(--ink);font-size:17px;padding:16px 4px}
+#mapv{position:fixed;left:0;top:0;right:0;bottom:0;z-index:5;background:#1e293b;touch-action:none;overflow:hidden;user-select:none;-webkit-user-select:none}
+#mtiles{position:absolute;left:0;top:0;right:0;bottom:0;z-index:0}
+#mmark{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:1}
+.mfab{width:46px;height:46px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.mfab svg,.msb svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.msb{display:flex;align-items:center;gap:6px;height:46px;padding:0 14px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:15px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.35)}.msb svg{width:20px;height:20px}
+.mtop{position:fixed;z-index:10;top:calc(10px + env(safe-area-inset-top,0px))}
+.mlb.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+#mlay{position:fixed;z-index:11;top:calc(64px + env(safe-area-inset-top,0px));right:0;transform:translateX(110%);transition:transform .2s;background:var(--card);border:1px solid var(--line);border-right:0;border-radius:14px 0 0 14px;padding:8px;display:flex;flex-direction:column;gap:8px;box-shadow:0 2px 10px rgba(0,0,0,.4)}#mlay.on{transform:none}
+#mdock{position:fixed;z-index:10;left:0;right:0;bottom:0;display:flex;flex-direction:column;gap:8px;padding:0 10px calc(12px + env(safe-area-inset-bottom,0px));pointer-events:none}
+#mdock button,#mdock .mpanel{pointer-events:auto}
+.mrow{display:flex;justify-content:flex-end;gap:8px}
+.mpanel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;box-shadow:0 2px 10px rgba(0,0,0,.4)}
+.mbar{display:flex;gap:8px;align-items:stretch}.mco{flex:1;min-width:0}.mcol{width:auto!important;margin:0!important;flex:0 0 auto;padding:0 18px!important;box-shadow:0 2px 10px rgba(0,0,0,.4)}
+.sheet{position:fixed;z-index:20;left:0;right:0;bottom:0;max-height:88%;overflow:auto;box-sizing:border-box;background:var(--card);color:var(--ink);border-top:2px solid var(--ac);border-radius:18px 18px 0 0;padding:14px 14px calc(14px + env(safe-area-inset-bottom,0px));box-shadow:0 -4px 16px rgba(0,0,0,.4)}
+.mban{position:fixed;z-index:12;top:calc(10px + env(safe-area-inset-top,0px));left:66px;right:66px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-size:14px;text-align:center;display:none;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.mattr{position:fixed;z-index:9;top:calc(18px + env(safe-area-inset-top,0px));left:66px;right:66px;text-align:center;font-size:11px;color:#fff;text-shadow:0 0 3px #000,0 0 3px #000;pointer-events:none}
+#mtoast{position:fixed;z-index:12;top:calc(66px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);max-width:88%;background:var(--card);color:var(--ink);border:1px solid var(--ac);border-radius:12px;padding:10px 14px;font-size:14px;display:none;box-shadow:0 2px 8px rgba(0,0,0,.35)}
 </style></head><body><div id="app"></div>
 <script>
 let S;try{S=JSON.parse(localStorage.getItem("campo_v1"))}catch(e){}
@@ -36,7 +54,7 @@ const AD={disco:"Discos (cm)",bica:"Bica / ponto de queda (unitário, aceita neg
 const col=c=>c<=10?"var(--ok)":c<=15?"var(--wa)":"var(--er)";
 const M=id=>S.machines.find(m=>m.id==id);
 let draft=null,cur=null;
-function go(n,p){stopGPS();const mm=document.getElementById("pm");if(mm)mm.remove();window.scrollTo(0,0);({home,fert,pontos,plista,pgrupo,backup,form,machine,test:newTest}[n])(p)}
+function go(n,p){stopGPS();const mm=document.getElementById("pm");if(mm)mm.remove();document.body.style.overflow="";window.scrollTo(0,0);({home,fert,pontos,plista,pgrupo,backup,form,machine,test:newTest}[n])(p)}
 function st(a){const n=a.length,m=a.reduce((x,y)=>x+y,0)/n,sd=Math.sqrt(a.reduce((s,v)=>s+(v-m)**2,0)/(n-1));return{m,sd,cv:m>0?sd/m*100:0}}
 function ovl(x,y,W){if(!(W>0)||x.length<2)return null;
  const f=p=>{if(p<x[0]||p>x[x.length-1])return 0;let i=1;while(p>x[i])i++;const t=(p-x[i-1])/(x[i]-x[i-1]);return y[i-1]+t*(y[i]-y[i-1])};
@@ -47,43 +65,47 @@ function home(){app.innerHTML=`<h1>🌾 Campo</h1><div class="tiles"><div class=
 let gon=false,gw=null,gp=null,gerr="",coll=null,gt=null,gst="";
 const gF=(v,d)=>v==null||!isFinite(v)?"–":v.toFixed(d);
 function stopGPS(){try{if(gw!==null&&navigator.geolocation)navigator.geolocation.clearWatch(gw)}catch(e){}gw=null;gon=false;clearTimeout(gt)}
-function pontos(){coll=null;gp=null;gerr="";gst="";gmc=null;stopGPS();S.points=S.points||[];
- app.innerHTML=pBar("Coleta de pontos")+`
-<div class="card"><div id="gps"></div><small id="gdiag" class="mut" style="display:block;margin-top:8px"></small></div>
-<div class="card" id="gmapc"><b>Mapa de posição</b><div style="display:flex;gap:6px;margin:8px 0;flex-wrap:wrap"><button class="sm" id="gm_radar" onclick="gMode('radar')">Radar</button><button class="sm" id="gm_sat" onclick="gMode('sat')">Satélite</button><button class="sm" id="gm_rua" onclick="gMode('rua')">Ruas</button><button class="sm" style="background:var(--mut)" onclick="gZoom(-1)">−</button><button class="sm" style="background:var(--mut)" onclick="gZoom(1)">+</button></div><div id="gmap"></div><small id="gnote2">Sem imagem de fundo. Escolha Satélite ou Ruas para ver o mapa (precisa de internet).</small><br><small>Nos pontos salvos há o link "Abrir no Google Maps".</small></div>
-<div id="gres"></div>`;
- gDraw();gDiag()}
-function gDiag(){let t=`Localização: ${navigator.geolocation?"disponível":"indisponível"} · conexão segura: ${window.isSecureContext?"sim":"não"} · dentro de outro quadro: ${window.self!==window.top?"sim":"não"}`;
- const up=()=>{const e=$("#gdiag");if(e)e.textContent=t};up();
- try{navigator.permissions.query({name:"geolocation"}).then(r=>{t+=` · permissão: ${r.state}`;up()}).catch(()=>{})}catch(e){}}
+function pontos(){coll=null;gp=null;gerr="";gst="";gpick=false;pk=null;mtl=new Map();mfollow=true;gtl=0;gdk="";stopGPS();S.points=S.points||[];
+ if(!MV){const lp=S.points[S.points.length-1];MV=lp?{fx:mFx(lp.lon),fy:mFy(lp.lat),z:17}:{fx:mFx(-51.9),fy:mFy(-14.2),z:4}}
+ document.body.style.overflow="hidden";
+ app.innerHTML=`<div id="mapv"><div id="mtiles"></div><svg id="mmark"></svg></div>
+<button class="mfab mtop" style="left:10px;font-size:22px" onclick="pMenu()" aria-label="Menu">☰</button>
+<button class="mfab mtop" style="right:10px" onclick="mLay()" aria-label="Camadas do mapa" title="Camadas do mapa">${IC.layers}</button>
+<div id="mlay"><button class="mfab mlb" data-m="radar" onclick="gMode('radar')" aria-label="Radar" title="Radar">${IC.radar}</button><button class="mfab mlb" data-m="sat" onclick="gMode('sat')" aria-label="Satélite" title="Satélite">${IC.sat}</button><button class="mfab mlb" data-m="rua" onclick="gMode('rua')" aria-label="Mapa de ruas" title="Mapa de ruas">${IC.map}</button></div>
+<div id="mattr" class="mattr"></div><div id="mban" class="mban"></div><div id="mtoast"></div><div id="mdock"></div><div id="gpk" class="sheet" style="display:none"></div><div id="gres"></div>`;
+ mInit();gMode(gmode,1);gDiag();mSched()}
+let gdt="",gdk="";
+function gDiag(){gdt=`Localização: ${navigator.geolocation?"disponível":"indisponível"} · conexão segura: ${window.isSecureContext?"sim":"não"} · dentro de outro quadro: ${window.self!==window.top?"sim":"não"}`;gdk="";gDock();
+ try{navigator.permissions.query({name:"geolocation"}).then(r=>{gdt+=` · permissão: ${r.state}`;gdk="";gDock()}).catch(()=>{})}catch(e){}}
 function gStart(){stopGPS();gp=null;gerr="";
  if(!navigator.geolocation){gerr="Este aparelho ou navegador não oferece localização.";gDraw();return}
- gon=true;gst="Aguardando permissão e sinal do GPS…";gDraw();
+ gon=true;gst="Aguardando permissão e sinal do GPS…";mfollow=true;gDraw();
  gt=setTimeout(()=>{if(!gp&&!gerr){gst="Ainda sem sinal. Vá para um local aberto e aguarde alguns segundos.";gDraw()}},15000);
- try{gw=navigator.geolocation.watchPosition(p=>{gp=p;gerr="";gDraw()},e=>{gerr=e.code==1?"Permissão de localização negada. Se o GPS do aparelho está ligado, o visualizador do claude.ai pode estar bloqueando a localização: abra o link do app direto no Chrome ou no Safari e toque em Permitir.":e.code==2?"Posição indisponível. Verifique se o GPS está ligado.":"Tempo esgotado ao obter a posição.";gDraw()},{enableHighAccuracy:true,maximumAge:0,timeout:30000})}catch(e){gon=false;gerr="Não foi possível acessar a localização neste ambiente.";gDraw()}}
+ try{gw=navigator.geolocation.watchPosition(p=>{const first=!gp;gp=p;gerr="";gFix(first)},e=>{gerr=e.code==1?"Permissão de localização negada. Se o GPS do aparelho está ligado, o visualizador do claude.ai pode estar bloqueando a localização: abra o link do app direto no Chrome ou no Safari e toque em Permitir.":e.code==2?"Posição indisponível. Verifique se o GPS está ligado.":"Tempo esgotado ao obter a posição.";gDraw()},{enableHighAccuracy:true,maximumAge:0,timeout:30000})}catch(e){gon=false;gerr="Não foi possível acessar a localização neste ambiente.";gDraw()}}
 function gStop(){stopGPS();gp=null;gst="";gerr="";gDraw()}
-function gDraw(){const g=$("#gps"),m=$("#gmap");if(!g||!m)return;const er=gerr?`<p style="color:var(--er);margin:8px 0 0">${gerr}</p>`:"";
- if(!gp){m.innerHTML="";
-  if(!gon)g.innerHTML=`<small>GPS DESLIGADO</small><p class="mut" style="margin:4px 0 0">Toque em Iniciar coleta para ligar o GPS do aparelho. O navegador vai pedir permissão de localização.</p>${er}<button class="btn" onclick="gStart()">Iniciar coleta</button>`;
-  else g.innerHTML=`<small>GPS LIGADO</small><p style="margin:4px 0 0">${gst}</p>${er}${gerr?`<button class="lnk" onclick="gStart()">Tentar novamente</button> · `:""}<button class="lnk" onclick="gStop()">Parar</button>`;return}
- const c=gp.coords;
- g.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div><small>POSIÇÃO ATUAL · WGS84</small><br><b>${gF(c.latitude,6)}, ${gF(c.longitude,6)}</b><br><small>precisão ± ${gF(c.accuracy,1)} m</small></div><button class="sm" onclick="gCollect()">Coletar ponto</button></div>${er}<button class="lnk" style="font-size:14px" onclick="gStop()">Parar GPS</button>`;
- const cx=170,cy=105,R=90,pts=S.points||[],mpLat=110540,mpLon=111320*Math.cos(c.latitude*Math.PI/180);
- const rel=pts.map((p,i)=>({i,dx:(p.lon-c.longitude)*mpLon,dy:(p.lat-c.latitude)*mpLat}));
- const dist=rel.map(r=>Math.hypot(r.dx,r.dy)).filter(d=>d<=2000),mx=Math.max(20,...dist),Rm=[20,50,100,200,500,1000,2000].find(v=>v>=mx)||2000,sc=R/Rm,ar=Math.min(c.accuracy*sc,R);
- const pins=rel.filter(r=>Math.hypot(r.dx,r.dy)<=Rm).map(r=>`<circle cx="${(cx+r.dx*sc).toFixed(1)}" cy="${(cy-r.dy*sc).toFixed(1)}" r="4" fill="#16a34a" stroke="#fff" stroke-width="1"/><text x="${(cx+r.dx*sc+6).toFixed(1)}" y="${(cy-r.dy*sc+3).toFixed(1)}" font-size="9" fill="var(--ink)">${r.i+1}</text>`).join("");
- if(gmode!=="radar"){gTiles(c);return}
- m.innerHTML=`<svg viewBox="0 0 340 210" width="100%"><circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="var(--line)"/><circle cx="${cx}" cy="${cy}" r="${R/2}" fill="none" stroke="var(--line)" stroke-dasharray="3 3"/><circle cx="${cx}" cy="${cy}" r="${ar.toFixed(1)}" fill="#3b82f6" opacity=".18"/>${pins}<circle cx="${cx}" cy="${cy}" r="6" fill="#3b82f6" stroke="#fff" stroke-width="2"/><text x="${cx+R+6}" y="${cy+3}" font-size="9" fill="var(--mut)">${Rm} m</text><text x="${cx+R/2+3}" y="${cy-3}" font-size="8" fill="var(--mut)">${Rm/2}</text><path d="M322 34l-6 14h12z" fill="var(--mut)"/><text x="322" y="28" font-size="10" text-anchor="middle" fill="var(--mut)">N</text></svg>`}
-function gCollect(){if(!gp)return;const c=gp.coords;coll={lat:c.latitude,lon:c.longitude,acc:c.accuracy,alt:c.altitude,altAcc:c.altitudeAccuracy,ts:gp.timestamp};
- $("#gres").innerHTML=`<div class="card" style="border:2px solid var(--ac)"><b>Ponto coletado</b>
-<p style="margin:8px 0">Datum: <b>WGS84</b><br>Latitude: <b>${gF(coll.lat,7)}</b><br>Longitude: <b>${gF(coll.lon,7)}</b><br>Precisão horizontal: <b>± ${gF(coll.acc,1)} m</b>${coll.alt!=null?`<br>Altitude: <b>${gF(coll.alt,1)} m</b>${coll.altAcc!=null?` (± ${gF(coll.altAcc,1)} m)`:""}`:""}<br>Data e hora: <b>${new Date(coll.ts).toLocaleString("pt-BR")}</b></p>${coll.acc>20?`<p style="color:var(--wa);margin:0 0 8px">Precisão acima de 20 m. Se puder, aguarde o GPS estabilizar e colete de novo.</p>`:""}
+function gDraw(){if(!$("#mapv"))return;gDock();mSched()}
+function gFix(first){if(!$("#mapv"))return;if(first&&MV.z<15)MV.z=17;if(mfollow&&gp)mCenterOn(gp.coords.latitude,gp.coords.longitude);gDock();mSched()}
+function gDock(){const d=$("#mdock");if(!d)return;const er=gerr?`<p style="color:var(--er);margin:6px 0 0">${gerr}</p>`:"";
+ const key=(gp?"fix":gon?"on:"+gst:"off:"+gdt)+"|"+gerr;
+ if(gp){const c=gp.coords,co=`<small>POSIÇÃO ATUAL · WGS84</small><br><b>${gF(c.latitude,6)}, ${gF(c.longitude,6)}</b><br><small>precisão ± ${gF(c.accuracy,1)} m · <button class="lnk" style="padding:0;font-size:13px" onclick="gStop()">Parar GPS</button></small>`;
+  if(key===gdk&&$("#gco")){$("#gco").innerHTML=co;return}gdk=key;
+  d.innerHTML=mStack()+`<div class="mbar"><div class="mpanel mco" id="gco">${co}</div><button class="btn mcol" onclick="gCollect()">Coletar ponto</button></div>${er}`;return}
+ if(key===gdk)return;gdk=key;
+ d.innerHTML=mStack()+(!gon?`<div class="mpanel"><small>GPS DESLIGADO</small><p class="mut" style="margin:4px 0 0">Toque em Iniciar coleta para ligar o GPS do aparelho. O navegador vai pedir permissão de localização.</p>${er}<button class="btn" style="margin-top:8px" onclick="gStart()">Iniciar coleta</button><small class="mut" style="display:block;margin-top:8px">${gdt}</small></div>`:`<div class="mpanel"><small>GPS LIGADO</small><p style="margin:4px 0 0">${gst}</p>${er}${gerr?`<button class="lnk" onclick="gStart()">Tentar novamente</button> · `:""}<button class="lnk" onclick="gStop()">Parar</button></div>`)}
+const mStack=()=>`<div class="mrow"><button class="mfab" aria-label="Centralizar na minha posição" title="Centralizar na minha posição" onclick="mCenter()">${IC.loc}</button><button class="msb" onclick="pkStart()">${IC.pin} Marcar no mapa</button></div>`;
+function gresClear(){const g=$("#gres");if(g){g.className="";g.innerHTML=""}}
+function toast(t){const e=$("#mtoast");if(!e)return;e.textContent=t;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>{e.style.display="none"},3500)}
+function gCollect(){if(!gp)return;const c=gp.coords;coll={lat:c.latitude,lon:c.longitude,acc:c.accuracy,alt:c.altitude,altAcc:c.altitudeAccuracy,ts:gp.timestamp};gForm()}
+function gForm(){const el=$("#gres");if(!el||!coll)return;el.className="sheet";
+ el.innerHTML=`<b>Ponto coletado</b>
+<p style="margin:8px 0">Datum: <b>WGS84</b><br>Latitude: <b>${gF(coll.lat,7)}</b><br>Longitude: <b>${gF(coll.lon,7)}</b>${coll.man?`<br>Origem: <b>marcado no mapa</b>`:`<br>Precisão horizontal: <b>± ${gF(coll.acc,1)} m</b>${coll.alt!=null?`<br>Altitude: <b>${gF(coll.alt,1)} m</b>${coll.altAcc!=null?` (± ${gF(coll.altAcc,1)} m)`:""}`:""}`}<br>Data e hora: <b>${new Date(coll.ts).toLocaleString("pt-BR")}</b></p>${!coll.man&&coll.acc>20?`<p style="color:var(--wa);margin:0 0 8px">Precisão acima de 20 m. Se puder, aguarde o GPS estabilizar e colete de novo.</p>`:""}
 <label>Nome do ponto<input id="gname" value="Ponto ${(S.points||[]).length+1}"></label>
 ${grpPicker("ggrp","ggn",lastG)}
 <label>Anotações<textarea id="gnote" rows="3" placeholder="Anotações relevantes sobre este ponto" style="width:100%;box-sizing:border-box;font-size:16px;padding:10px;margin-top:4px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)"></textarea></label>
-<p id="ggm" style="color:var(--er);margin:6px 0 0"></p><div class="row" style="margin-top:8px"><button class="sm" style="background:var(--mut)" onclick="coll=null;$('#gres').innerHTML=''">Descartar</button><button class="sm" onclick="gSave()">Salvar ponto</button></div></div>`;$("#gres").scrollIntoView&&$("#gres").scrollIntoView({block:"nearest"})}
+<p id="ggm" style="color:var(--er);margin:6px 0 0"></p><div class="row" style="margin-top:8px"><button class="sm" style="background:var(--mut)" onclick="coll=null;gresClear()">Descartar</button><button class="sm" onclick="gSave()">Salvar ponto</button></div>`}
 function gSave(){if(!coll)return;const gid=grpResolve("ggrp","ggn");if(!gid){$("#ggm").textContent="Informe o nome do novo grupo.";return}
  S.points.push({id:Date.now().toString(36),...coll,datum:"WGS84",name:($("#gname").value||"").trim(),note:$("#gnote").value.trim(),gid});lastG=gid;save();coll=null;
- const g=S.groups.find(x=>x.id==gid);$("#gres").innerHTML=`<p class="mut" style="margin:6px 0">Ponto salvo no grupo "${esc(g.name)}".</p>`;gDraw()}
+ const g=S.groups.find(x=>x.id==gid);gresClear();toast(`Ponto salvo no grupo "${g.name}".`);gDraw()}
 function askDelP(id){$("#p_"+id).innerHTML=`<b style="color:var(--er)">Excluir este ponto?</b><br>Este ponto não poderá ser recuperado.<div class="row" style="margin-top:8px"><button class="sm" style="background:var(--mut)" onclick="gList()">Cancelar</button><button class="sm" style="background:var(--er)" onclick="delP('${id}')">Excluir ponto</button></div>`}
 function delP(id){gsel.delete(id);S.points=S.points.filter(p=>p.id!=id);save();gList();gDraw()}
 function fert(){app.innerHTML=`<button class="lnk" onclick="go('home')">‹ Início</button><h2>Teste de distribuição de fertilizantes</h2>`+(S.machines.length?S.machines.map(m=>`<div class="card tap" onclick="go('machine','${m.id}')"><b>${esc(m.fleet)}</b> · ${esc(m.brand)} ${esc(m.model)}<br><small>${m.adj.map(a=>AD[a].split(" (")[0]).join(" + ")} · ${S.tests.filter(t=>t.mid==m.id).length} teste(s)</small></div>`).join(""):`<p class="mut">Nenhum equipamento cadastrado.</p>`)+`<button class="btn" onclick="go('form')">+ Adicionar equipamento</button>`}
@@ -242,19 +264,72 @@ function bDo(d,gid){const add=k=>{S[k]=S[k]||[];const ids=new Set(S[k].map(x=>x.
  const a=add("machines"),b=add("tests");let c=0;
  if(gid){const ids=new Set(S.points.map(x=>x.id));(d.points||[]).forEach(x=>{if(x&&!ids.has(x.id)){S.points.push({...x,gid});ids.add(x.id);c++}})}
  ["brands","products"].forEach(k=>(d[k]||[]).forEach(x=>{if(!S[k].includes(x))S[k].push(x)}));save();$("#bm2").textContent=`Importado: ${a} equipamento(s), ${b} teste(s), ${c} ponto(s).`}
-let gmode="radar",gz=17,gmc=null,gtl=0;
-function gMode(m){gmode=m;gmc=null;["radar","sat","rua"].forEach(k=>{const b=$("#gm_"+k);if(b)b.style.opacity=k==m?1:.45});const n=$("#gnote2");if(n)n.textContent=m=="radar"?"Sem imagem de fundo. Escolha Satélite ou Ruas para ver o mapa (precisa de internet).":(m=="sat"?"Imagens de satélite © Esri":"Mapa de ruas © OpenStreetMap")+" · precisa de internet.";gDraw()}
-function gZoom(d){gz=Math.min(19,Math.max(14,gz+d));gmc=null;gDraw()}
-function gTiles(c){const m=$("#gmap");if(!m)return;const W=(gmc&&gmc.W)||m.clientWidth||320,Hh=240,z=gz,n=2**z,P=(la,lo)=>{const s=Math.sin(la*Math.PI/180);return[(lo+180)/360*n*256,(.5-Math.log((1+s)/(1-s))/(4*Math.PI))*n*256]};
- const[px,py]=P(c.latitude,c.longitude);
- if(!gmc||!$("#tmap")||Math.hypot(px-gmc.px,py-gmc.py)>Math.min(W,Hh)*.3){gmc={px,py,W};gtl=0;const x0=px-W/2,y0=py-Hh/2;let im="";
-  for(let tx=Math.floor(x0/256);tx<=Math.floor((x0+W)/256);tx++)for(let ty=Math.floor(y0/256);ty<=Math.floor((y0+Hh)/256);ty++){if(ty<0||ty>=n)continue;const xx=((tx%n)+n)%n,u=gmode=="sat"?`https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${ty}/${xx}`:`https://tile.openstreetmap.org/${z}/${xx}/${ty}.png`;
-   im+=`<img src="${u}" alt="" style="position:absolute;left:${(tx*256-x0).toFixed(1)}px;top:${(ty*256-y0).toFixed(1)}px;width:256px;height:256px" onload="gtl++">`}
-  m.innerHTML=`<div id="tmap" style="position:relative;width:100%;height:${Hh}px;overflow:hidden;background:#1e293b;border-radius:10px">${im}<div id="tmk"></div></div>`;
-  setTimeout(()=>{const n2=$("#gnote2");if($("#tmap")&&!gtl&&n2)n2.textContent="As imagens do mapa não carregaram: esta página bloqueia imagens externas ou o aparelho está sem internet."},4000)}
- const mk=$("#tmk");if(!mk)return;const x0=gmc.px-gmc.W/2,y0=gmc.py-Hh/2,mpp=156543.03*Math.cos(c.latitude*Math.PI/180)/n,ar=Math.min(c.accuracy/mpp,200);
- const dot=(la,lo,col,r,t)=>{const[a,b]=P(la,lo);return`<div style="position:absolute;left:${(a-x0-r).toFixed(1)}px;top:${(b-y0-r).toFixed(1)}px;width:${2*r}px;height:${2*r}px;border-radius:50%;background:${col};border:2px solid #fff;box-sizing:border-box;color:#fff;font-size:9px;text-align:center;line-height:${2*r-4}px">${t||""}</div>`},[ca,cb]=P(c.latitude,c.longitude);
- mk.innerHTML=`<div style="position:absolute;left:${(ca-x0-ar).toFixed(1)}px;top:${(cb-y0-ar).toFixed(1)}px;width:${(2*ar).toFixed(1)}px;height:${(2*ar).toFixed(1)}px;border-radius:50%;background:rgba(59,130,246,.22)"></div>`+(S.points||[]).map((p,i)=>dot(p.lat,p.lon,"#16a34a",8,i+1)).join("")+dot(c.latitude,c.longitude,"#3b82f6",8)+`<div style="position:absolute;right:4px;bottom:2px;font-size:9px;color:#fff;text-shadow:0 0 3px #000">${gmode=="sat"?"© Esri":"© OpenStreetMap"}</div>`}
+const mLS=()=>{try{return JSON.parse(localStorage.getItem("campo_map"))||{}}catch(e){return{}}};
+let gmode=mLS().mode||"radar",MV=null,mtl=new Map(),mraf=0,mfollow=true,gpick=false,pk=null,gtl=0;
+const IC={
+ layers:`<svg viewBox="0 0 24 24"><path d="M12 2 2 7l10 5 10-5z"/><path d="M2 12l10 5 10-5"/><path d="M2 17l10 5 10-5"/></svg>`,
+ radar:`<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12l6.5-6.5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>`,
+ sat:`<svg viewBox="0 0 24 24"><g transform="rotate(-45 12 12)"><rect x="9.5" y="9" width="5" height="6" rx="1"/><path d="M9.5 12H7M14.5 12H17"/><rect x="2" y="9.5" width="5" height="5" rx=".8"/><rect x="17" y="9.5" width="5" height="5" rx=".8"/></g><path d="M13.5 21a7.5 7.5 0 0 0 7.500-7.500M13.500 17.500a3.500 3.500 0 0 0 3.500-3.500"/></svg>`,
+ map:`<svg viewBox="0 0 24 24"><path d="M3 6l6-2.5 6 2.5 6-2.5v14.5l-6 2.5-6-2.5-6 2.5z"/><path d="M9 3.5V18M15 6v14.500"/></svg>`,
+ loc:`<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5"/><circle cx="12" cy="12" r="8"/><path d="M12 1.500v3M12 19.500v3M1.500 12h3M19.500 12h3"/></svg>`,
+ pin:`<svg viewBox="0 0 24 24"><path d="M12 21s-7-6.200-7-11a7 7 0 0 1 14 0c0 4.800-7 11-7 11z"/><circle cx="12" cy="10" r="2.500"/></svg>`};
+const mW=z=>256*2**z,mFx=lo=>(lo+180)/360,mFy=la=>{const s=Math.sin(la*Math.PI/180);return .5-Math.log((1+s)/(1-s))/(4*Math.PI)},mLon=fx=>fx*360-180,mLat=fy=>180/Math.PI*Math.atan(Math.sinh(Math.PI*(1-2*fy)));
+const mCenterOn=(la,lo)=>{MV.fx=mFx(lo);MV.fy=mFy(la)};
+function mSched(){if(mraf)return;mraf=requestAnimationFrame(()=>{mraf=0;mRender()})}
+function mCenter(){if(!gp){toast("Ainda sem posição do GPS. Toque em Iniciar coleta.");return}mfollow=true;if(MV.z<16)MV.z=17;mCenterOn(gp.coords.latitude,gp.coords.longitude);mSched()}
+function mLay(){const l=$("#mlay");if(l)l.classList.toggle("on")}
+function closeLay(){const l=$("#mlay");if(l)l.classList.remove("on")}
+function gMode(m,init){gmode=m;if(!init)try{localStorage.setItem("campo_map",JSON.stringify({mode:m}))}catch(e){}
+ mtl.forEach(t=>t.img.remove());mtl=new Map();gtl=0;
+ document.querySelectorAll("#mlay .mlb").forEach(b=>b.classList.toggle("on",b.dataset.m==m));
+ const a=$("#mattr");if(a){a.textContent=m=="sat"?"© Esri":m=="rua"?"© OpenStreetMap":"";a.style.display=m=="radar"?"none":"block"}
+ closeLay();
+ if(m!="radar")setTimeout(()=>{const x=$("#mattr");if(x&&gmode==m&&!gtl&&$("#mapv"))x.textContent="As imagens do mapa não carregaram: sem internet ou bloqueadas nesta página."},4000);
+ mSched()}
+function mRender(){const el=$("#mapv");if(!el||!MV)return;const W=el.clientWidth,H=el.clientHeight;if(!W||!H)return;
+ MV.z=Math.min(19,Math.max(3,MV.z));MV.fx=Math.min(1,Math.max(0,MV.fx));MV.fy=Math.min(1,Math.max(0,MV.fy));
+ const wd=mW(MV.z),sx=f=>W/2+(f-MV.fx)*wd,sy=f=>H/2+(f-MV.fy)*wd;
+ if(gmode!=="radar"){const zt=Math.min(19,Math.max(1,Math.round(MV.z))),n=2**zt,sc=2**(MV.z-zt),cx=MV.fx*n*256,cy=MV.fy*n*256,hw=W/2/sc,hh=H/2/sc,lay=$("#mtiles"),need=new Set();let allOk=true;
+  for(let tx=Math.floor((cx-hw)/256);tx<=Math.floor((cx+hw)/256);tx++)for(let ty=Math.floor((cy-hh)/256);ty<=Math.floor((cy+hh)/256);ty++){
+   if(ty<0||ty>=n)continue;const k=gmode+"/"+zt+"/"+tx+"/"+ty;need.add(k);let t=mtl.get(k);
+   if(!t){const xx=((tx%n)+n)%n,img=new Image();img.alt="";img.draggable=false;
+    img.src=gmode=="sat"?`https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${zt}/${ty}/${xx}`:`https://tile.openstreetmap.org/${zt}/${xx}/${ty}.png`;
+    img.style.cssText="position:absolute;max-width:none;pointer-events:none;-webkit-user-drag:none;z-index:"+zt;img.onload=()=>{gtl++;mSched()};lay.appendChild(img);t={img,zt,tx,ty};mtl.set(k,t)}
+   if(!(t.img.complete&&t.img.naturalWidth))allOk=false}
+  mtl.forEach((t,k)=>{const nn=2**t.zt,s2=2**(MV.z-t.zt),l=W/2+(t.tx*256-MV.fx*nn*256)*s2,tp=H/2+(t.ty*256-MV.fy*nn*256)*s2,sz=256*s2;
+   if(l>W+300||tp>H+300||l+sz<-300||tp+sz<-300||(allOk&&t.zt!==zt)||(mtl.size>160&&!need.has(k))){t.img.remove();mtl.delete(k);return}
+   t.img.style.left=l.toFixed(1)+"px";t.img.style.top=tp.toFixed(1)+"px";t.img.style.width=(sz+.6).toFixed(1)+"px";t.img.style.height=(sz+.6).toFixed(1)+"px"})}
+ const mm=$("#mmark");let h="";
+ if(gp){const c=gp.coords,x=sx(mFx(c.longitude)),y=sy(mFy(c.latitude)),mp=156543.03392*Math.cos(c.latitude*Math.PI/180)/2**MV.z;
+  if(gmode==="radar")[10,20,50,100,200,500,1000,2000,5000].forEach(d=>{const r=d/mp;if(r<22||r>Math.max(W,H)*1.5)return;h+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" fill="none" stroke="#64748b" stroke-opacity=".75" stroke-dasharray="4 4"/><text x="${(x+4).toFixed(1)}" y="${(y-r-3).toFixed(1)}" font-size="10" fill="#cbd5e1">${d>=1000?d/1000+" km":d+" m"}</text>`});
+  const ar=Math.min(c.accuracy/mp,3000);h+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${ar.toFixed(1)}" fill="#3b82f6" fill-opacity=".18"/>`}
+ S.points.forEach((p,i)=>{const x=sx(mFx(p.lon)),y=sy(mFy(p.lat));if(x<-20||x>W+20||y<-20||y>H+20)return;h+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="9" fill="#16a34a" stroke="#fff" stroke-width="2"/><text x="${x.toFixed(1)}" y="${y.toFixed(1)}" font-size="10" font-weight="700" fill="#fff" text-anchor="middle" dy=".35em">${i+1}</text>`});
+ if(gp){const c=gp.coords;h+=`<circle cx="${sx(mFx(c.longitude)).toFixed(1)}" cy="${sy(mFy(c.latitude)).toFixed(1)}" r="8" fill="#3b82f6" stroke="#fff" stroke-width="2.5"/>`}
+ if(pk)h+=`<circle cx="${sx(mFx(pk.lon)).toFixed(1)}" cy="${sy(mFy(pk.lat)).toFixed(1)}" r="11" fill="#f97316" stroke="#fff" stroke-width="3"/><circle cx="${sx(mFx(pk.lon)).toFixed(1)}" cy="${sy(mFy(pk.lat)).toFixed(1)}" r="3" fill="#fff"/>`;
+ if(gmode==="radar")h+=`<path d="M33 66l-6 14h12z" fill="#94a3b8"/><text x="33" y="62" font-size="10" text-anchor="middle" fill="#94a3b8">N</text>`;
+ mm.setAttribute("viewBox",`0 0 ${W} ${H}`);mm.innerHTML=h}
+function mInit(){const el=$("#mapv");if(!el)return;const P=new Map();let g=null,tap=null;
+ const rel=e=>{const r=el.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}};
+ const mid=()=>{const q=[...P.values()];return q.length>1?{x:(q[0].x+q[1].x)/2,y:(q[0].y+q[1].y)/2}:q[0]};
+ const dist=()=>{const q=[...P.values()];return q.length>1?Math.hypot(q[0].x-q[1].x,q[0].y-q[1].y):0};
+ const anchor=()=>{if(!P.size){g=null;return}const m=mid(),wd=mW(MV.z);g={d:dist(),z:MV.z,afx:MV.fx+(m.x-el.clientWidth/2)/wd,afy:MV.fy+(m.y-el.clientHeight/2)/wd}};
+ el.onpointerdown=e=>{try{el.setPointerCapture(e.pointerId)}catch(x){}P.set(e.pointerId,rel(e));if(P.size==1)tap={x:e.clientX,y:e.clientY,t:Date.now(),moved:false};else if(tap)tap.moved=true;anchor();closeLay()};
+ el.onpointermove=e=>{if(!P.has(e.pointerId)||!g)return;P.set(e.pointerId,rel(e));if(tap&&Math.hypot(e.clientX-tap.x,e.clientY-tap.y)>10)tap.moved=true;
+  if(!(tap&&tap.moved))return;mfollow=false;const m=mid();let z=g.z;if(P.size>1&&g.d>0)z=Math.min(19,Math.max(3,g.z+Math.log2(dist()/g.d)));
+  const wd=mW(z);MV.z=z;MV.fx=g.afx-(m.x-el.clientWidth/2)/wd;MV.fy=g.afy-(m.y-el.clientHeight/2)/wd;mSched()};
+ const up=e=>{if(!P.has(e.pointerId))return;const r=rel(e);P.delete(e.pointerId);
+  if(e.type=="pointerup"&&tap&&!tap.moved&&P.size==0&&Date.now()-tap.t<700&&gpick)mPick(r.x,r.y);
+  if(P.size==0)tap=null;anchor()};
+ el.onpointerup=up;el.onpointercancel=up;
+ el.onwheel=e=>{e.preventDefault();const r=rel(e),wd=mW(MV.z),afx=MV.fx+(r.x-el.clientWidth/2)/wd,afy=MV.fy+(r.y-el.clientHeight/2)/wd;MV.z=Math.min(19,Math.max(3,MV.z-e.deltaY/300));const w2=mW(MV.z);MV.fx=afx-(r.x-el.clientWidth/2)/w2;MV.fy=afy-(r.y-el.clientHeight/2)/w2;mfollow=false;closeLay();mSched()}}
+function pkStart(){gpick=true;pk=null;closeLay();pkUI();mSched()}
+function pkCancel(){gpick=false;pk=null;pkUI();mSched()}
+function mPick(x,y){const el=$("#mapv"),wd=mW(MV.z);pk={lat:mLat(MV.fy+(y-el.clientHeight/2)/wd),lon:mLon(MV.fx+(x-el.clientWidth/2)/wd)};pkUI();mSched()}
+function pkOk(){if(!pk)return;coll={lat:pk.lat,lon:pk.lon,acc:null,alt:null,altAcc:null,ts:Date.now(),man:true};gpick=false;pk=null;pkUI();gForm();mSched()}
+function pkUI(){const d=$("#mdock"),b=$("#mban"),s=$("#gpk");if(!d||!b||!s)return;d.style.display=gpick?"none":"flex";
+ b.style.display=gpick&&!pk?"block":"none";if(gpick&&!pk)b.innerHTML=`Toque no mapa no lugar do ponto <button class="lnk" style="padding:0 0 0 8px;font-size:14px" onclick="pkCancel()">Cancelar</button>`;
+ if(gpick&&pk){s.style.display="block";s.innerHTML=`<b>Ponto marcado no mapa</b><p style="margin:6px 0">Latitude: <b>${gF(pk.lat,7)}</b><br>Longitude: <b>${gF(pk.lon,7)}</b><br><small class="mut">Toque em outro lugar do mapa para mover a marca.</small></p><div class="row"><button class="sm" style="background:var(--mut)" onclick="pkCancel()">Cancelar</button><button class="sm" onclick="pkOk()">Gravar este ponto</button></div>`}else{s.style.display="none";s.innerHTML=""}}
+window.addEventListener("resize",()=>mSched());
 let gsel=new Set(),curG=null,lastG=null;
 const pName=(p,i)=>p.name||"Ponto "+(i+1);
 const gPts=()=>S.points.map((p,i)=>({p,i})).filter(x=>x.p.gid==curG);
@@ -279,7 +354,7 @@ function gDelAsk(){const n=S.points.filter(p=>p.gid==curG).length;$("#gh").inner
 function gDel(){S.points=S.points.filter(p=>p.gid!=curG);S.groups=S.groups.filter(g=>g.id!=curG);gsel=new Set();save();go("plista")}
 function gList(){const el=$("#glist");if(!el)return;const pts=gPts();
  el.innerHTML=`<div class="card"><b>Pontos do grupo (${pts.length})</b>`+(pts.length?`<div id="gcnt" class="mut" style="margin:6px 0">${gCnt()}</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"><button class="sm" style="background:var(--mut)" onclick="gAll(1)">Selecionar todos</button><button class="sm" style="background:var(--mut)" onclick="gAll(0)">Limpar seleção</button></div><div class="mut" style="font-size:13px">Exportar:</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px"><button class="sm" onclick="gExp('csv')">CSV</button><button class="sm" onclick="gExp('kml')">KML</button><button class="sm" onclick="gExp('shp')">SHP</button><button class="sm" onclick="gExp('lcsv')">Lista CSV</button><button class="sm" onclick="gExp('lpdf')">Lista PDF</button></div><p id="gexm" class="mut" style="margin:6px 0 0"></p>`:"")+
- pts.map(({p,i})=>`<div id="p_${p.id}" style="border-top:1px solid var(--line);margin-top:8px;padding-top:8px"><label class="chk" style="margin:0"><input type="checkbox" ${gsel.has(p.id)?"checked":""} onchange="gTog('${p.id}',this.checked)"> <b>${esc(pName(p,i))}</b></label><small style="display:block">${new Date(p.ts).toLocaleString("pt-BR")}<br>${gF(p.lat,7)}, ${gF(p.lon,7)} · WGS84 · ± ${gF(p.acc,1)} m${p.alt!=null?` · alt. ${gF(p.alt,1)} m`:""}</small>${p.note?`<div>${esc(p.note)}</div>`:""}<a href="https://www.google.com/maps?q=${p.lat},${p.lon}" target="_blank" rel="noopener" style="color:var(--ac)">Abrir no Google Maps</a> · <button class="lnk" style="padding:0;font-size:14px" onclick="gEdit('${p.id}')">Editar</button> · <button class="lnk" style="color:var(--er);padding:0;font-size:14px" onclick="askDelP('${p.id}')">Excluir ponto</button></div>`).join("")+(pts.length?"":`<p class="mut" style="margin:6px 0 0">Nenhum ponto neste grupo.</p>`)+`</div>`}
+ pts.map(({p,i})=>`<div id="p_${p.id}" style="border-top:1px solid var(--line);margin-top:8px;padding-top:8px"><label class="chk" style="margin:0"><input type="checkbox" ${gsel.has(p.id)?"checked":""} onchange="gTog('${p.id}',this.checked)"> <b>${esc(pName(p,i))}</b></label><small style="display:block">${new Date(p.ts).toLocaleString("pt-BR")}<br>${gF(p.lat,7)}, ${gF(p.lon,7)} · WGS84${p.acc==null?" · marcado no mapa":" · ± "+gF(p.acc,1)+" m"}${p.alt!=null?` · alt. ${gF(p.alt,1)} m`:""}</small>${p.note?`<div>${esc(p.note)}</div>`:""}<a href="https://www.google.com/maps?q=${p.lat},${p.lon}" target="_blank" rel="noopener" style="color:var(--ac)">Abrir no Google Maps</a> · <button class="lnk" style="padding:0;font-size:14px" onclick="gEdit('${p.id}')">Editar</button> · <button class="lnk" style="color:var(--er);padding:0;font-size:14px" onclick="askDelP('${p.id}')">Excluir ponto</button></div>`).join("")+(pts.length?"":`<p class="mut" style="margin:6px 0 0">Nenhum ponto neste grupo.</p>`)+`</div>`}
 function gEdit(id){const i=S.points.findIndex(p=>p.id==id),p=S.points[i];$("#p_"+id).innerHTML=`<label>Nome do ponto<input id="en" value="${esc(pName(p,i))}"></label><label>Grupo<select id="eg">${S.groups.map(g=>`<option value="${g.id}" ${g.id==p.gid?"selected":""}>${esc(g.name)}</option>`).join("")}</select></label><label>Anotações<textarea id="eo" rows="2" ${TA}>${esc(p.note||"")}</textarea></label><div class="row"><button class="sm" style="background:var(--mut)" onclick="gList()">Cancelar</button><button class="sm" onclick="gEditSave('${id}')">Salvar</button></div>`}
 function gEditSave(id){const p=S.points.find(x=>x.id==id);p.name=$("#en").value.trim();p.note=$("#eo").value.trim();p.gid=$("#eg").value;save();gList();gDraw()}
 const gd=()=>{const d=new Date();return d.getFullYear()+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0")};
@@ -309,7 +384,7 @@ async function gExp(k){const pts=gSet(),m=$("#gexm"),say=s=>{if(m)m.textContent=
  const f=n=>n.toFixed(7),dc=n=>n.toFixed(7).replace(".",","),D=gd();let r;
  try{if(k=="csv")r=await dl(`pontos-${D}.csv`,"\ufeff"+["nome,latitude,longitude,precisao_m,altitude_m,data_hora,anotacoes",...pts.map(p=>[qc(p.name),f(p.lat),f(p.lon),p.acc==null?"":p.acc.toFixed(1),p.alt==null?"":p.alt.toFixed(1),qc(new Date(p.ts).toISOString()),qc(p.note)].join(","))].join("\r\n"));
  else if(k=="lcsv")r=await dl(`lista-pontos-${D}.csv`,"\ufeff"+["Nome;Latitude;Longitude",...pts.map(p=>[qc(p.name),dc(p.lat),dc(p.lon)].join(";"))].join("\r\n"));
- else if(k=="kml")r=await dl(`pontos-${D}.kml`,`<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>Pontos coletados</name>${pts.map(p=>`<Placemark><name>${xe(p.name)}</name><description>${xe((p.note?p.note+" | ":"")+"precisão ± "+gF(p.acc,1)+" m | "+new Date(p.ts).toLocaleString("pt-BR"))}</description><Point><coordinates>${f(p.lon)},${f(p.lat)},${p.alt!=null?p.alt.toFixed(1):0}</coordinates></Point></Placemark>`).join("")}</Document></kml>`);
+ else if(k=="kml")r=await dl(`pontos-${D}.kml`,`<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>Pontos coletados</name>${pts.map(p=>`<Placemark><name>${xe(p.name)}</name><description>${xe((p.note?p.note+" | ":"")+(p.acc==null?"marcado no mapa":"precisão ± "+gF(p.acc,1)+" m")+" | "+new Date(p.ts).toLocaleString("pt-BR"))}</description><Point><coordinates>${f(p.lon)},${f(p.lat)},${p.alt!=null?p.alt.toFixed(1):0}</coordinates></Point></Placemark>`).join("")}</Document></kml>`);
  else if(k=="shp")r=await dl(`pontos-${D}-shp.zip`,mkShp(pts));
  else r=await dl(`lista-pontos-${D}.pdf`,mkLista(pts))}catch(e){r="erro"}
  say(r=="ok"?`Arquivo gerado (${pts.length} ponto(s)).`:r=="declined"?"Cancelado.":"Não foi possível salvar o arquivo.")}
