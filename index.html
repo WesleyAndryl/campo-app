@@ -29,8 +29,9 @@ input,select{width:100%;box-sizing:border-box;font-size:16px;padding:10px;margin
 .mfab svg,.msb svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .msb{display:flex;align-items:center;gap:6px;height:46px;padding:0 14px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:15px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.35)}.msb svg{width:20px;height:20px}
 .mtop{position:fixed;z-index:10;top:calc(10px + env(safe-area-inset-top,0px))}
-.mlb.on{background:var(--ac);color:#fff;border-color:var(--ac)}
-#mlay{position:fixed;z-index:11;top:calc(64px + env(safe-area-inset-top,0px));right:0;transform:translateX(110%);transition:transform .2s;background:var(--card);border:1px solid var(--line);border-right:0;border-radius:14px 0 0 14px;padding:8px;display:flex;flex-direction:column;gap:8px;box-shadow:0 2px 10px rgba(0,0,0,.4)}#mlay.on{transform:none}
+.mlb.on,#mrb.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.mpop{position:fixed;z-index:11;right:64px;transform:translateX(calc(100% + 70px));transition:transform .2s;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px;display:flex;flex-direction:column;gap:8px;box-shadow:0 2px 10px rgba(0,0,0,.4)}.mpop.on{transform:none}
+#mmeas{position:fixed;z-index:10;left:10px;right:10px;bottom:calc(12px + env(safe-area-inset-bottom,0px));display:none}
 #mdock{position:fixed;z-index:10;left:0;right:0;bottom:0;display:flex;flex-direction:column;gap:8px;padding:0 10px calc(12px + env(safe-area-inset-bottom,0px));pointer-events:none}
 #mdock button,#mdock .mpanel{pointer-events:auto}
 .mrow{display:flex;justify-content:flex-end;gap:8px}
@@ -39,7 +40,7 @@ input,select{width:100%;box-sizing:border-box;font-size:16px;padding:10px;margin
 .sheet{position:fixed;z-index:20;left:0;right:0;bottom:0;max-height:88%;overflow:auto;box-sizing:border-box;background:var(--card);color:var(--ink);border-top:2px solid var(--ac);border-radius:18px 18px 0 0;padding:14px 14px calc(14px + env(safe-area-inset-bottom,0px));box-shadow:0 -4px 16px rgba(0,0,0,.4)}
 .mban{position:fixed;z-index:12;top:calc(10px + env(safe-area-inset-top,0px));left:66px;right:66px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-size:14px;text-align:center;display:none;box-shadow:0 2px 8px rgba(0,0,0,.35)}
 .mattr{position:fixed;z-index:9;top:calc(18px + env(safe-area-inset-top,0px));left:66px;right:66px;text-align:center;font-size:11px;color:#fff;text-shadow:0 0 3px #000,0 0 3px #000;pointer-events:none}
-#mtoast{position:fixed;z-index:12;top:calc(66px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);max-width:88%;background:var(--card);color:var(--ink);border:1px solid var(--ac);border-radius:12px;padding:10px 14px;font-size:14px;display:none;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+#mtoast{position:fixed;z-index:12;top:calc(124px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);max-width:88%;background:var(--card);color:var(--ink);border:1px solid var(--ac);border-radius:12px;padding:10px 14px;font-size:14px;display:none;box-shadow:0 2px 8px rgba(0,0,0,.35)}
 </style></head><body><div id="app"></div>
 <script>
 let S;try{S=JSON.parse(localStorage.getItem("campo_v1"))}catch(e){}
@@ -65,14 +66,16 @@ function home(){app.innerHTML=`<h1>🌾 Campo</h1><div class="tiles"><div class=
 let gon=false,gw=null,gp=null,gerr="",coll=null,gt=null,gst="";
 const gF=(v,d)=>v==null||!isFinite(v)?"–":v.toFixed(d);
 function stopGPS(){try{if(gw!==null&&navigator.geolocation)navigator.geolocation.clearWatch(gw)}catch(e){}gw=null;gon=false;clearTimeout(gt)}
-function pontos(){coll=null;gp=null;gerr="";gst="";gpick=false;pk=null;mtl=new Map();mfollow=true;gtl=0;gdk="";stopGPS();S.points=S.points||[];
+function pontos(){coll=null;gp=null;gerr="";gst="";gpick=false;pk=null;ms=null;msWait=false;mtl=new Map();mfollow=true;gtl=0;gdk="";stopGPS();S.points=S.points||[];
  if(!MV){const lp=S.points[S.points.length-1];MV=lp?{fx:mFx(lp.lon),fy:mFy(lp.lat),z:17}:{fx:mFx(-51.9),fy:mFy(-14.2),z:4}}
  document.body.style.overflow="hidden";
  app.innerHTML=`<div id="mapv"><div id="mtiles"></div><svg id="mmark"></svg></div>
 <button class="mfab mtop" style="left:10px;font-size:22px" onclick="pMenu()" aria-label="Menu">☰</button>
 <button class="mfab mtop" style="right:10px" onclick="mLay()" aria-label="Camadas do mapa" title="Camadas do mapa">${IC.layers}</button>
-<div id="mlay"><button class="mfab mlb" data-m="radar" onclick="gMode('radar')" aria-label="Radar" title="Radar">${IC.radar}</button><button class="mfab mlb" data-m="sat" onclick="gMode('sat')" aria-label="Satélite" title="Satélite">${IC.sat}</button><button class="mfab mlb" data-m="rua" onclick="gMode('rua')" aria-label="Mapa de ruas" title="Mapa de ruas">${IC.map}</button></div>
-<div id="mattr" class="mattr"></div><div id="mban" class="mban"></div><div id="mtoast"></div><div id="mdock"></div><div id="gpk" class="sheet" style="display:none"></div><div id="gres"></div>`;
+<button class="mfab mtop" id="mrb" style="right:10px;top:calc(64px + env(safe-area-inset-top,0px))" onclick="mRul()" aria-label="Medir distância e área" title="Medir">${IC.ruler}</button>
+<div id="mlay" class="mpop" style="top:calc(10px + env(safe-area-inset-top,0px))"><button class="mfab mlb" data-m="radar" onclick="gMode('radar')" aria-label="Radar" title="Radar">${IC.radar}</button><button class="mfab mlb" data-m="sat" onclick="gMode('sat')" aria-label="Satélite" title="Satélite">${IC.sat}</button><button class="mfab mlb" data-m="rua" onclick="gMode('rua')" aria-label="Mapa de ruas" title="Mapa de ruas">${IC.map}</button></div>
+<div id="mrul" class="mpop" style="top:calc(64px + env(safe-area-inset-top,0px))"><button class="msb" onclick="msStart()">${IC.poly} Ponto a ponto</button></div>
+<div id="mattr" class="mattr"></div><div id="mban" class="mban"></div><div id="mtoast"></div><div id="mdock"></div><div id="mmeas" class="mpanel"></div><div id="gpk" class="sheet" style="display:none"></div><div id="gres"></div>`;
  mInit();gMode(gmode,1);gDiag();mSched()}
 let gdt="",gdk="";
 function gDiag(){gdt=`Localização: ${navigator.geolocation?"disponível":"indisponível"} · conexão segura: ${window.isSecureContext?"sim":"não"} · dentro de outro quadro: ${window.self!==window.top?"sim":"não"}`;gdk="";gDock();
@@ -82,9 +85,9 @@ function gStart(){stopGPS();gp=null;gerr="";
  gon=true;gst="Aguardando permissão e sinal do GPS…";mfollow=true;gDraw();
  gt=setTimeout(()=>{if(!gp&&!gerr){gst="Ainda sem sinal. Vá para um local aberto e aguarde alguns segundos.";gDraw()}},15000);
  try{gw=navigator.geolocation.watchPosition(p=>{const first=!gp;gp=p;gerr="";gFix(first)},e=>{gerr=e.code==1?"Permissão de localização negada. Se o GPS do aparelho está ligado, o visualizador do claude.ai pode estar bloqueando a localização: abra o link do app direto no Chrome ou no Safari e toque em Permitir.":e.code==2?"Posição indisponível. Verifique se o GPS está ligado.":"Tempo esgotado ao obter a posição.";gDraw()},{enableHighAccuracy:true,maximumAge:0,timeout:30000})}catch(e){gon=false;gerr="Não foi possível acessar a localização neste ambiente.";gDraw()}}
-function gStop(){stopGPS();gp=null;gst="";gerr="";gDraw()}
+function gStop(){stopGPS();gp=null;gst="";gerr="";msWait=false;gDraw()}
 function gDraw(){if(!$("#mapv"))return;gDock();mSched()}
-function gFix(first){if(!$("#mapv"))return;if(first&&MV.z<15)MV.z=17;if(mfollow&&gp)mCenterOn(gp.coords.latitude,gp.coords.longitude);gDock();mSched()}
+function gFix(first){if(!$("#mapv"))return;if(first&&MV.z<15)MV.z=17;if(mfollow&&gp)mCenterOn(gp.coords.latitude,gp.coords.longitude);if(msWait&&gp){msWait=false;msAddPos()}gDock();mSched()}
 function gDock(){const d=$("#mdock");if(!d)return;const er=gerr?`<p style="color:var(--er);margin:6px 0 0">${gerr}</p>`:"";
  const key=(gp?"fix":gon?"on:"+gst:"off:"+gdt)+"|"+gerr;
  if(gp){const c=gp.coords,co=`<small>POSIÇÃO ATUAL · WGS84</small><br><b>${gF(c.latitude,6)}, ${gF(c.longitude,6)}</b><br><small>precisão ± ${gF(c.accuracy,1)} m · <button class="lnk" style="padding:0;font-size:13px" onclick="gStop()">Parar GPS</button></small>`;
@@ -265,8 +268,10 @@ function bDo(d,gid){const add=k=>{S[k]=S[k]||[];const ids=new Set(S[k].map(x=>x.
  if(gid){const ids=new Set(S.points.map(x=>x.id));(d.points||[]).forEach(x=>{if(x&&!ids.has(x.id)){S.points.push({...x,gid});ids.add(x.id);c++}})}
  ["brands","products"].forEach(k=>(d[k]||[]).forEach(x=>{if(!S[k].includes(x))S[k].push(x)}));save();$("#bm2").textContent=`Importado: ${a} equipamento(s), ${b} teste(s), ${c} ponto(s).`}
 const mLS=()=>{try{return JSON.parse(localStorage.getItem("campo_map"))||{}}catch(e){return{}}};
-let gmode=mLS().mode||"radar",MV=null,mtl=new Map(),mraf=0,mfollow=true,gpick=false,pk=null,gtl=0;
+let gmode=mLS().mode||"radar",MV=null,mtl=new Map(),mraf=0,mfollow=true,gpick=false,pk=null,gtl=0,ms=null,msWait=false;
 const IC={
+ ruler:`<svg viewBox="0 0 24 24"><g transform="rotate(-45 12 12)"><rect x="1" y="8" width="22" height="8" rx="1.5"/><path d="M5 8v3M9 8v4.500M13 8v3M17 8v4.500"/></g></svg>`,
+ poly:`<svg viewBox="0 0 24 24"><path d="M4 18l6-9 5 6 5-9"/><circle cx="4" cy="18" r="1.600"/><circle cx="10" cy="9" r="1.600"/><circle cx="15" cy="15" r="1.600"/><circle cx="20" cy="6" r="1.600"/></svg>`,
  layers:`<svg viewBox="0 0 24 24"><path d="M12 2 2 7l10 5 10-5z"/><path d="M2 12l10 5 10-5"/><path d="M2 17l10 5 10-5"/></svg>`,
  radar:`<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12l6.5-6.5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>`,
  sat:`<svg viewBox="0 0 24 24"><g transform="rotate(-45 12 12)"><rect x="9.5" y="9" width="5" height="6" rx="1"/><path d="M9.5 12H7M14.5 12H17"/><rect x="2" y="9.5" width="5" height="5" rx=".8"/><rect x="17" y="9.5" width="5" height="5" rx=".8"/></g><path d="M13.5 21a7.5 7.5 0 0 0 7.500-7.500M13.500 17.500a3.500 3.500 0 0 0 3.500-3.500"/></svg>`,
@@ -277,8 +282,8 @@ const mW=z=>256*2**z,mFx=lo=>(lo+180)/360,mFy=la=>{const s=Math.sin(la*Math.PI/1
 const mCenterOn=(la,lo)=>{MV.fx=mFx(lo);MV.fy=mFy(la)};
 function mSched(){if(mraf)return;mraf=requestAnimationFrame(()=>{mraf=0;mRender()})}
 function mCenter(){if(!gp){toast("Ainda sem posição do GPS. Toque em Iniciar coleta.");return}mfollow=true;if(MV.z<16)MV.z=17;mCenterOn(gp.coords.latitude,gp.coords.longitude);mSched()}
-function mLay(){const l=$("#mlay");if(l)l.classList.toggle("on")}
-function closeLay(){const l=$("#mlay");if(l)l.classList.remove("on")}
+function mLay(){const l=$("#mlay"),on=l&&!l.classList.contains("on");closeLay();if(on)l.classList.add("on")}
+function closeLay(){document.querySelectorAll(".mpop").forEach(x=>x.classList.remove("on"))}
 function gMode(m,init){gmode=m;if(!init)try{localStorage.setItem("campo_map",JSON.stringify({mode:m}))}catch(e){}
  mtl.forEach(t=>t.img.remove());mtl=new Map();gtl=0;
  document.querySelectorAll("#mlay .mlb").forEach(b=>b.classList.toggle("on",b.dataset.m==m));
@@ -304,6 +309,7 @@ function mRender(){const el=$("#mapv");if(!el||!MV)return;const W=el.clientWidth
   if(gmode==="radar")[10,20,50,100,200,500,1000,2000,5000].forEach(d=>{const r=d/mp;if(r<22||r>Math.max(W,H)*1.5)return;h+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" fill="none" stroke="#64748b" stroke-opacity=".75" stroke-dasharray="4 4"/><text x="${(x+4).toFixed(1)}" y="${(y-r-3).toFixed(1)}" font-size="10" fill="#cbd5e1">${d>=1000?d/1000+" km":d+" m"}</text>`});
   const ar=Math.min(c.accuracy/mp,3000);h+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${ar.toFixed(1)}" fill="#3b82f6" fill-opacity=".18"/>`}
  S.points.forEach((p,i)=>{const x=sx(mFx(p.lon)),y=sy(mFy(p.lat));if(x<-20||x>W+20||y<-20||y>H+20)return;h+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="9" fill="#16a34a" stroke="#fff" stroke-width="2"/><text x="${x.toFixed(1)}" y="${y.toFixed(1)}" font-size="10" font-weight="700" fill="#fff" text-anchor="middle" dy=".35em">${i+1}</text>`});
+ h+=msSvg(sx,sy);
  if(gp){const c=gp.coords;h+=`<circle cx="${sx(mFx(c.longitude)).toFixed(1)}" cy="${sy(mFy(c.latitude)).toFixed(1)}" r="8" fill="#3b82f6" stroke="#fff" stroke-width="2.5"/>`}
  if(pk)h+=`<circle cx="${sx(mFx(pk.lon)).toFixed(1)}" cy="${sy(mFy(pk.lat)).toFixed(1)}" r="11" fill="#f97316" stroke="#fff" stroke-width="3"/><circle cx="${sx(mFx(pk.lon)).toFixed(1)}" cy="${sy(mFy(pk.lat)).toFixed(1)}" r="3" fill="#fff"/>`;
  if(gmode==="radar")h+=`<path d="M33 66l-6 14h12z" fill="#94a3b8"/><text x="33" y="62" font-size="10" text-anchor="middle" fill="#94a3b8">N</text>`;
@@ -318,17 +324,50 @@ function mInit(){const el=$("#mapv");if(!el)return;const P=new Map();let g=null,
   if(!(tap&&tap.moved))return;mfollow=false;const m=mid();let z=g.z;if(P.size>1&&g.d>0)z=Math.min(19,Math.max(3,g.z+Math.log2(dist()/g.d)));
   const wd=mW(z);MV.z=z;MV.fx=g.afx-(m.x-el.clientWidth/2)/wd;MV.fy=g.afy-(m.y-el.clientHeight/2)/wd;mSched()};
  const up=e=>{if(!P.has(e.pointerId))return;const r=rel(e);P.delete(e.pointerId);
-  if(e.type=="pointerup"&&tap&&!tap.moved&&P.size==0&&Date.now()-tap.t<700&&gpick)mPick(r.x,r.y);
+  if(e.type=="pointerup"&&tap&&!tap.moved&&P.size==0&&Date.now()-tap.t<700&&(gpick||ms))gpick?mPick(r.x,r.y):msTap(r.x,r.y);
   if(P.size==0)tap=null;anchor()};
  el.onpointerup=up;el.onpointercancel=up;
  el.onwheel=e=>{e.preventDefault();const r=rel(e),wd=mW(MV.z),afx=MV.fx+(r.x-el.clientWidth/2)/wd,afy=MV.fy+(r.y-el.clientHeight/2)/wd;MV.z=Math.min(19,Math.max(3,MV.z-e.deltaY/300));const w2=mW(MV.z);MV.fx=afx-(r.x-el.clientWidth/2)/w2;MV.fy=afy-(r.y-el.clientHeight/2)/w2;mfollow=false;closeLay();mSched()}}
-function pkStart(){gpick=true;pk=null;closeLay();pkUI();mSched()}
+function pkStart(){if(ms){ms=null;msWait=false;msUI()}gpick=true;pk=null;closeLay();pkUI();mSched()}
 function pkCancel(){gpick=false;pk=null;pkUI();mSched()}
 function mPick(x,y){const el=$("#mapv"),wd=mW(MV.z);pk={lat:mLat(MV.fy+(y-el.clientHeight/2)/wd),lon:mLon(MV.fx+(x-el.clientWidth/2)/wd)};pkUI();mSched()}
 function pkOk(){if(!pk)return;coll={lat:pk.lat,lon:pk.lon,acc:null,alt:null,altAcc:null,ts:Date.now(),man:true};gpick=false;pk=null;pkUI();gForm();mSched()}
-function pkUI(){const d=$("#mdock"),b=$("#mban"),s=$("#gpk");if(!d||!b||!s)return;d.style.display=gpick?"none":"flex";
+function pkUI(){const d=$("#mdock"),b=$("#mban"),s=$("#gpk");if(!d||!b||!s)return;dockVis();
  b.style.display=gpick&&!pk?"block":"none";if(gpick&&!pk)b.innerHTML=`Toque no mapa no lugar do ponto <button class="lnk" style="padding:0 0 0 8px;font-size:14px" onclick="pkCancel()">Cancelar</button>`;
  if(gpick&&pk){s.style.display="block";s.innerHTML=`<b>Ponto marcado no mapa</b><p style="margin:6px 0">Latitude: <b>${gF(pk.lat,7)}</b><br>Longitude: <b>${gF(pk.lon,7)}</b><br><small class="mut">Toque em outro lugar do mapa para mover a marca.</small></p><div class="row"><button class="sm" style="background:var(--mut)" onclick="pkCancel()">Cancelar</button><button class="sm" onclick="pkOk()">Gravar este ponto</button></div>`}else{s.style.display="none";s.innerHTML=""}}
+function geoDist(la1,lo1,la2,lo2){const a=6378137,f=1/298.257223563,b=a*(1-f),r=Math.PI/180,L=(lo2-lo1)*r,U1=Math.atan((1-f)*Math.tan(la1*r)),U2=Math.atan((1-f)*Math.tan(la2*r)),sU1=Math.sin(U1),cU1=Math.cos(U1),sU2=Math.sin(U2),cU2=Math.cos(U2);
+ let lam=L,it=0,sS,cS,sg,c2a,c2s,sig,lp;
+ do{const sl=Math.sin(lam),cl=Math.cos(lam);sS=Math.hypot(cU2*sl,cU1*sU2-sU1*cU2*cl);if(sS===0)return 0;cS=sU1*sU2+cU1*cU2*cl;sig=Math.atan2(sS,cS);sg=cU1*cU2*sl/sS;c2a=1-sg*sg;c2s=c2a?cS-2*sU1*sU2/c2a:0;const C=f/16*c2a*(4+f*(4-3*c2a));lp=lam;lam=L+(1-C)*f*sg*(sig+C*sS*(c2s+C*cS*(-1+2*c2s*c2s)))}while(Math.abs(lam-lp)>1e-12&&++it<100);
+ const u2=c2a*(a*a-b*b)/(b*b),A=1+u2/16384*(4096+u2*(-768+u2*(320-175*u2))),B=u2/1024*(256+u2*(-128+u2*(74-47*u2))),ds=B*sS*(c2s+B/4*(cS*(-1+2*c2s*c2s)-B/6*c2s*(-3+4*sS*sS)*(-3+4*c2s*c2s)));return b*A*(sig-ds)}
+function geoArea(p){const r=Math.PI/180,a=6378137,e2=.00669437999014,la0=p.reduce((s,q)=>s+q.lat,0)/p.length,lo0=p.reduce((s,q)=>s+q.lon,0)/p.length,sn=Math.sin(la0*r),w=1-e2*sn*sn,Mr=a*(1-e2)/w**1.5,Nr=a/Math.sqrt(w),c=Math.cos(la0*r),xy=p.map(q=>[(q.lon-lo0)*r*Nr*c,(q.lat-la0)*r*Mr]);let s=0;xy.forEach((q,i)=>{const u=xy[(i+1)%xy.length];s+=q[0]*u[1]-u[0]*q[1]});return Math.abs(s)/2}
+const fmN=(v,d)=>v.toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d}),fmM=v=>fmN(v,1)+" m";
+function msCalc(){const p=ms.pts,n=p.length,seg=[];for(let i=0;i<n-1;i++)seg.push(geoDist(p[i].lat,p[i].lon,p[i+1].lat,p[i+1].lon));
+ const cl=ms.closed&&n>=3;if(cl)seg.push(geoDist(p[n-1].lat,p[n-1].lon,p[0].lat,p[0].lon));return{seg,tot:seg.reduce((a,b)=>a+b,0),area:cl?geoArea(p):null}}
+function dockVis(){const d=$("#mdock");if(d)d.style.display=(gpick||ms)?"none":"flex"}
+function mRul(){const l=$("#mrul"),on=l&&!l.classList.contains("on");closeLay();if(on)l.classList.add("on")}
+function msStart(){if(ms){closeLay();return}if(gpick){gpick=false;pk=null;pkUI()}closeLay();ms={pts:[],closed:false};msUI();mSched()}
+function msExit(){ms=null;msWait=false;msUI();mSched()}
+function msClear(){if(!ms)return;ms.pts=[];ms.closed=false;msWait=false;msUI();mSched()}
+function msUndo(){if(!ms)return;if(ms.closed)ms.closed=false;else ms.pts.pop();msUI();mSched()}
+function msTap(x,y){const el=$("#mapv"),W=el.clientWidth,H=el.clientHeight,wd=mW(MV.z);
+ if(ms.closed){toast("Polígono fechado. Use Desfazer ou Limpar para continuar.");return}
+ if(ms.pts.length>=3){const f=ms.pts[0];if(Math.hypot(x-(W/2+(mFx(f.lon)-MV.fx)*wd),y-(H/2+(mFy(f.lat)-MV.fy)*wd))<=24){ms.closed=true;msUI();mSched();return}}
+ ms.pts.push({lat:mLat(MV.fy+(y-H/2)/wd),lon:mLon(MV.fx+(x-W/2)/wd)});msUI();mSched()}
+function msAddPos(){if(!ms||!gp)return;if(ms.closed){toast("Polígono fechado. Use Desfazer ou Limpar para continuar.");return}const c=gp.coords;ms.pts.push({lat:c.latitude,lon:c.longitude,gps:true});msUI();mSched();toast(`Posição adicionada (± ${gF(c.accuracy,1)} m).`)}
+function msGps(){if(!ms)return;if(gp){msAddPos();return}msWait=true;if(!gon){gStart();toast("Ligando o GPS. A posição será adicionada quando houver sinal.")}else toast("Aguardando o sinal do GPS.")}
+function msUI(){const m=$("#mmeas"),b=$("#mrb");if(!m)return;dockVis();
+ if(!ms){m.style.display="none";m.innerHTML="";if(b)b.classList.remove("on");return}
+ if(b)b.classList.add("on");const c=msCalc(),n=ms.pts.length,cl=ms.closed&&n>=3;let info;
+ if(!n)info="Toque no mapa para adicionar o primeiro ponto.";
+ else if(n==1)info="1 ponto marcado. Toque no mapa para continuar.";
+ else if(cl)info=`Perímetro: <b>${fmM(c.tot)}</b><br>Área: <b>${fmN(c.area,1)} m²</b> · <b>${fmN(c.area/1e4,4)} ha</b>`;
+ else info=`Comprimento total: <b>${fmM(c.tot)}</b> · ${n} pontos`+(n>=3?`<br><small class="mut">Para fechar o polígono, toque no primeiro ponto.</small>`:"");
+ m.style.display="block";m.innerHTML=`<small>MEDIÇÃO PONTO A PONTO</small><p style="margin:4px 0 0">${info}</p><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><button class="sm" onclick="msGps()">+ Minha posição</button><button class="sm" style="background:var(--mut)" onclick="msUndo()">Desfazer</button><button class="sm" style="background:var(--mut)" onclick="msClear()">Limpar</button><button class="sm" style="background:var(--er)" onclick="msExit()">Sair</button></div>`}
+function msSvg(sx,sy){if(!ms||!ms.pts.length)return"";const q=ms.pts.map(p=>[sx(mFx(p.lon)),sy(mFy(p.lat))]),n=q.length,cl=ms.closed&&n>=3,c=msCalc(),f=v=>v.toFixed(1),d=q.map((v,i)=>(i?"L":"M")+f(v[0])+" "+f(v[1])).join("")+(cl?"Z":"");let h="";
+ if(cl)h+=`<path d="${d}" fill="#fbbf24" fill-opacity=".2"/>`;
+ if(n>1)h+=`<path d="${d}" fill="none" stroke="#000" stroke-opacity=".55" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/><path d="${d}" fill="none" stroke="#fbbf24" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>`;
+ c.seg.forEach((v,i)=>{const a=q[i],b=q[(i+1)%n];if(Math.hypot(b[0]-a[0],b[1]-a[1])<30)return;const tx=fmM(v),w=tx.length*6.3+12,mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2;h+=`<rect x="${f(mx-w/2)}" y="${f(my-9)}" width="${f(w)}" height="18" rx="6" fill="#0f172a" fill-opacity=".88" stroke="#fbbf24"/><text x="${f(mx)}" y="${f(my)}" font-size="11" font-weight="600" fill="#fff" text-anchor="middle" dy=".35em">${tx}</text>`});
+ q.forEach((v,i)=>{if(i==0&&n>=3&&!cl)h+=`<circle cx="${f(v[0])}" cy="${f(v[1])}" r="12" fill="#fbbf24" fill-opacity=".25" stroke="#fbbf24" stroke-width="2"/>`;h+=`<circle cx="${f(v[0])}" cy="${f(v[1])}" r="5.5" fill="#fff" stroke="${ms.pts[i].gps?"#3b82f6":"#b45309"}" stroke-width="2.5"/>`});return h}
 window.addEventListener("resize",()=>mSched());
 let gsel=new Set(),curG=null,lastG=null;
 const pName=(p,i)=>p.name||"Ponto "+(i+1);
