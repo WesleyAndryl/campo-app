@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0f172a"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><title>Campo · Teste de Bandeja</title>
+<style>
+:root{--bg:#f1f5f9;--card:#fff;--ink:#0f172a;--mut:#64748b;--line:#cbd5e1;--ac:#059669;--ok:#059669;--wa:#d97706;--er:#dc2626;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f172a;--card:#1e293b;--ink:#f1f5f9;--mut:#94a3b8;--line:#334155;--ac:#10b981;--ok:#10b981;--wa:#f59e0b;--er:#ef4444;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f172a;--card:#1e293b;--ink:#f1f5f9;--mut:#94a3b8;--line:#334155;--ac:#10b981;--ok:#10b981;--wa:#f59e0b;--er:#ef4444;color-scheme:dark}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px system-ui,sans-serif}
+#app{max-width:560px;margin:0 auto;padding:14px}
+h1,h2{margin:6px 0 12px}h1{color:var(--ac)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
+.tap{cursor:pointer}small,.mut{color:var(--mut)}
+label{display:block;font-size:13px;color:var(--mut);margin:8px 0}
+input,select{width:100%;box-sizing:border-box;font-size:16px;padding:10px;margin-top:4px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.chk{display:flex;gap:8px;align-items:center;color:var(--ink);font-size:16px}.chk input{width:auto;margin:0}
+.row{display:flex;gap:8px;align-items:end}.row>*{flex:1}.g2{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.sg label{margin:0}.sg input{text-align:center;padding:8px 2px}
+.btn{width:100%;padding:14px;border:0;border-radius:12px;background:var(--ac);color:#fff;font-size:16px;font-weight:700;margin-top:10px}
+.sm{flex:0 0 auto;padding:10px 12px;border:0;border-radius:10px;background:var(--ac);color:#fff;font-weight:700}
+.lnk{background:none;border:0;color:var(--ac);font-size:16px;padding:6px 0}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}.tile{aspect-ratio:1;background:var(--card);border:1px solid var(--line);border-radius:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:12px;text-align:center;cursor:pointer;font-size:14px;line-height:1.25}.tile svg{width:52%;max-width:92px;stroke:var(--ac);fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.big{font-size:34px;font-weight:800}
+.mi{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);color:var(--ink);font-size:17px;padding:16px 4px}
+#mapv{position:fixed;left:0;top:0;right:0;bottom:0;z-index:5;background:#1e293b;touch-action:none;overflow:hidden;user-select:none;-webkit-user-select:none}
+#mtiles{position:absolute;left:0;top:0;right:0;bottom:0;z-index:0}
+#mmark{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:1}
+.mfab{width:46px;height:46px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.mfab svg,.msb svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.msb{display:flex;align-items:center;gap:6px;height:46px;padding:0 14px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:15px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.35)}.msb svg{width:20px;height:20px}
+.mtop{position:fixed;z-index:10;top:calc(10px + env(safe-area-inset-top,0px))}
+.mlb.on,#mrb.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.mpop{position:fixed;z-index:11;right:64px;transform:translateX(calc(100% + 70px));transition:transform .2s;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px;display:flex;flex-direction:column;gap:8px;box-shadow:0 2px 10px rgba(0,0,0,.4)}.mpop.on{transform:none}
+#mmeas{position:fixed;z-index:10;left:10px;right:10px;bottom:calc(12px + env(safe-area-inset-bottom,0px));display:none}
+#mdock{position:fixed;z-index:10;left:0;right:0;bottom:0;display:flex;flex-direction:column;gap:8px;padding:0 10px calc(12px + env(safe-area-inset-bottom,0px));pointer-events:none}
+#mdock button,#mdock .mpanel{pointer-events:auto}
+.mrow{display:flex;justify-content:flex-end;gap:8px}
+.mpanel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;box-shadow:0 2px 10px rgba(0,0,0,.4)}
+.mbar{display:flex;gap:8px;align-items:stretch}.mco{flex:1;min-width:0}.mcol{width:auto!important;margin:0!important;flex:0 0 auto;padding:0 18px!important;box-shadow:0 2px 10px rgba(0,0,0,.4)}
+.sheet{position:fixed;z-index:20;left:0;right:0;bottom:0;max-height:88%;overflow:auto;box-sizing:border-box;background:var(--card);color:var(--ink);border-top:2px solid var(--ac);border-radius:18px 18px 0 0;padding:14px 14px calc(14px + env(safe-area-inset-bottom,0px));box-shadow:0 -4px 16px rgba(0,0,0,.4)}
+.mban{position:fixed;z-index:12;top:calc(10px + env(safe-area-inset-top,0px));left:66px;right:66px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-size:14px;text-align:center;display:none;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.mattr{position:fixed;z-index:9;top:calc(18px + env(safe-area-inset-top,0px));left:66px;right:66px;text-align:center;font-size:11px;color:#fff;text-shadow:0 0 3px #000,0 0 3px #000;pointer-events:none}
+#mtoast{position:fixed;z-index:12;top:calc(124px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);max-width:88%;background:var(--card);color:var(--ink);border:1px solid var(--ac);border-radius:12px;padding:10px 14px;font-size:14px;display:none;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+</style></head><body><div id="app"></div>
+<script>
+let S;try{S=JSON.parse(localStorage.getItem("campo_v1"))}catch(e){}
+S=S||{brands:["RoGator","John Deere","Case IH","Jacto","New Holland","Stara"],products:["Super Simples","MAP","KCl","Ureia","Calcário"],machines:[],tests:[]};
+const save=()=>{try{localStorage.setItem("campo_v1",JSON.stringify(S))}catch(e){}};
+S.points=S.points||[];S.groups=S.groups||[];S.clients=S.clients||[];S.farms=S.farms||[];S.fields=S.fields||[];S.safras=S.safras||[];S.cultivos=S.cultivos||[];S.crops=S.crops||["Soja","Milho","Algodão","Feijão","Sorgo","Milheto","Trigo"];
+if(S.points.some(p=>!p.gid)){let g=S.groups.find(x=>x.id=="g0");if(!g){g={id:"g0",name:"Sem grupo"};S.groups.push(g)}S.points.forEach(p=>{if(!p.gid)p.gid="g0"});save()}
+const $=s=>document.querySelector(s),app=$("#app");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const F=(v,d=1)=>isFinite(v)?v.toFixed(d).replace(".",","):"–";
+const AD={disco:"Discos (cm)",bica:"Bica / ponto de queda (unitário, aceita negativo)",palheta:"Palhetas (unitário, aceita negativo)"};
+const col=c=>c<=10?"var(--ok)":c<=15?"var(--wa)":"var(--er)";
+const M=id=>S.machines.find(m=>m.id==id);
+let draft=null,cur=null;
+function go(n,p){stopGPS();const mm=document.getElementById("pm");if(mm)mm.remove();document.body.style.overflow="";window.scrollTo(0,0);({home,fert,pontos,plista,pgrupo,cli,cform,cliente,fform,fazenda,tform,sform,safra,cult,backup,form,machine,test:newTest}[n])(p)}
+function st(a){const n=a.length,m=a.reduce((x,y)=>x+y,0)/n,sd=Math.sqrt(a.reduce((s,v)=>s+(v-m)**2,0)/(n-1));return{m,sd,cv:m>0?sd/m*100:0}}
+function ovl(x,y,W){if(!(W>0)||x.length<2)return null;
+ const f=p=>{if(p<x[0]||p>x[x.length-1])return 0;let i=1;while(p>x[i])i++;const t=(p-x[i-1])/(x[i]-x[i-1]);return y[i-1]+t*(y[i]-y[i-1])};
+ const K=Math.ceil(Math.max(Math.abs(x[0]),x[x.length-1])/W)+1,a=[];
+ for(let p=0;p<W;p+=W/200){let s=0;for(let k=-K;k<=K;k++)s+=f(p+k*W);a.push(s)}
+ return st(a)}
+function home(){app.innerHTML=`<h1>🌾 Campo</h1><div class="tiles"><div class="tile" onclick="go('fert')"><svg viewBox="0 0 64 64"><path d="M16 10h32l-7 22H23z"/><ellipse cx="32" cy="39" rx="11" ry="3.5"/><path d="M32 32v3.5"/><circle cx="12" cy="50" r="2" fill="var(--ac)"/><circle cx="22" cy="55" r="2" fill="var(--ac)"/><circle cx="32" cy="57" r="2" fill="var(--ac)"/><circle cx="42" cy="55" r="2" fill="var(--ac)"/><circle cx="52" cy="50" r="2" fill="var(--ac)"/></svg><b>Teste de distribuição de fertilizantes</b></div><div class="tile" onclick="go('pontos')"><svg viewBox="0 0 64 64"><path d="M32 6c-9.5 0-16 6.5-16 15 0 11 16 28 16 28s16-17 16-28c0-8.500-6.500-15-16-15z"/><circle cx="32" cy="21" r="5.500"/><ellipse cx="32" cy="56" rx="16" ry="4"/></svg><b>Coleta de pontos e amostras</b></div><div class="tile" onclick="go('cli')"><svg viewBox="0 0 64 64"><rect x="8" y="12" width="48" height="40" rx="5"/><path d="M8 29h48M24 12v17M42 29v23M24 40h18"/></svg><b>Clientes, fazendas e talhões</b></div></div><button class="btn" style="background:var(--card);color:var(--ink);border:1px solid var(--line)" onclick="go('backup')">Backup dos dados</button>`}
+let gon=false,gw=null,gp=null,gerr="",coll=null,gt=null,gst="";
+const gF=(v,d)=>v==null||!isFinite(v)?"–":v.toFixed(d);
+function stopGPS(){try{if(gw!==null&&navigator.geolocation)navigator.geolocation.clearWatch(gw)}catch(e){}gw=null;gon=false;clearTimeout(gt)}
+function pontos(){coll=null;gp=null;gerr="";gst="";gpick=false;pk=null;ms=null;msWait=false;mtl=new Map();mfollow=true;gtl=0;gdk="";stopGPS();S.points=S.points||[];
+ if(!MV){const lp=S.points[S.points.length-1];MV=lp?{fx:mFx(lp.lon),fy:mFy(lp.lat),z:17}:{fx:mFx(-51.9),fy:mFy(-14.2),z:4}}
+ document.body.style.overflow="hidden";
+ app.innerHTML=`<div id="mapv"><div id="mtiles"></div><svg id="mmark"></svg></div>
+<button class="mfab mtop" style="left:10px;font-size:22px" onclick="pMenu()" aria-label="Menu">☰</button>
+<button class="mfab mtop" style="right:10px" onclick="mLay()" aria-label="Camadas do mapa" title="Camadas do mapa">${IC.layers}</button>
+<button class="mfab mtop" id="mrb" style="right:10px;top:calc(64px + env(safe-area-inset-top,0px))" onclick="mRul()" aria-label="Medir distância e área" title="Medir">${IC.ruler}</button>
+<div id="mlay" class="mpop" style="top:calc(10px + env(safe-area-inset-top,0px))"><button class="mfab mlb" data-m="radar" onclick="gMode('radar')" aria-label="Radar" title="Radar">${IC.radar}</button><button class="mfab mlb" data-m="sat" onclick="gMode('sat')" aria-label="Satélite" title="Satélite">${IC.sat}</button><button class="mfab mlb" data-m="rua" onclick="gMode('rua')" aria-label="Mapa de ruas" title="Mapa de ruas">${IC.map}</button></div>
+<div id="mrul" class="mpop" style="top:calc(64px + env(safe-area-inset-top,0px))"><button class="msb" onclick="msStart()">${IC.poly} Ponto a ponto</button></div>
+<div id="mattr" class="mattr"></div><div id="mban" class="mban"></div><div id="mtoast"></div><div id="mdock"></div><div id="mmeas" class="mpanel"></div><div id="gpk" class="sheet" style="display:none"></div><div id="gres"></div>`;
+ mInit();gMode(gmode,1);gDiag();mSched()}
+let gdt="",gdk="";
+function gDiag(){gdt=`Localização: ${navigator.geolocation?"disponível":"indisponível"} · conexão segura: ${window.isSecureContext?"sim":"não"} · dentro de outro quadro: ${window.self!==window.top?"sim":"não"}`;gdk="";gDock();
+ try{navigator.permissions.query({name:"geolocation"}).then(r=>{gdt+=` · permissão: ${r.state}`;gdk="";gDock()}).catch(()=>{})}catch(e){}}
+function gStart(){stopGPS();gp=null;gerr="";
+ if(!navigator.geolocation){gerr="Este aparelho ou navegador não oferece localização.";gDraw();return}
+ gon=true;gst="Aguardando permissão e sinal do GPS…";mfollow=true;gDraw();
+ gt=setTimeout(()=>{if(!gp&&!gerr){gst="Ainda sem sinal. Vá para um local aberto e aguarde alguns segundos.";gDraw()}},15000);
+ try{gw=navigator.geolocation.watchPosition(p=>{const first=!gp;gp=p;gerr="";gFix(first)},e=>{gerr=e.code==1?"Permissão de localização negada. Se o GPS do aparelho está ligado, o visualizador do claude.ai pode estar bloqueando a localização: abra o link do app direto no Chrome ou no Safari e toque em Permitir.":e.code==2?"Posição indisponível. Verifique se o GPS está ligado.":"Tempo esgotado ao obter a posição.";gDraw()},{enableHighAccuracy:true,maximumAge:0,timeout:30000})}catch(e){gon=false;gerr="Não foi possível acessar a localização neste ambiente.";gDraw()}}
+function gStop(){stopGPS();gp=null;gst="";gerr="";msWait=false;gDraw()}
+function gDraw(){if(!$("#mapv"))return;gDock();mSched()}
+function gFix(first){if(!$("#mapv"))return;if(first&&MV.z<15)MV.z=17;if(mfollow&&gp)mCenterOn(gp.coords.latitude,gp.coords.longitude);if(msWait&&gp){msWait=false;msAddPos()}gDock();mSched()}
+function gDock(){const d=$("#mdock");if(!d)return;const er=gerr?`<p style="color:var(--er);margin:6px 0 0">${gerr}</p>`:"";
+ const key=(gp?"fix":gon?"on:"+gst:"off:"+gdt)+"|"+gerr;
+ if(gp){const c=gp.coords,co=`<small>POSIÇÃO ATUAL · WGS84</small><br><b>${gF(c.latitude,6)}, ${gF(c.longitude,6)}</b><br><small>precisão ± ${gF(c.accuracy,1)} m · <button class="lnk" style="padding:0;font-size:13px" onclick="gStop()">Parar GPS</button></small>`;
+  if(key===gdk&&$("#gco")){$("#gco").innerHTML=co;return}gdk=key;
+  d.innerHTML=mStack()+`<div class="mbar"><div class="mpanel mco" id="gco">${co}</div><button class="btn mcol" onclick="gCollect()">Coletar ponto</button></div>${er}`;return}
+ if(key===gdk)return;gdk=key;
+ d.innerHTML=mStack()+(!gon?`<div class="mpanel"><small>GPS DESLIGADO</small><p class="mut" style="margin:4px 0 0">Toque em Iniciar coleta para ligar o GPS do aparelho. O navegador vai pedir permissão de localização.</p>${er}<button class="btn" style="margin-top:8px" onclick="gStart()">Iniciar coleta</button><small class="mut" style="display:block;margin-top:8px">${gdt}</small></div>`:`<div class="mpanel"><small>GPS LIGADO</small><p style="margin:4px 0 0">${gst}</p>${er}${gerr?`<button class="lnk" onclick="gStart()">Tentar novamente</button> · `:""}<button class="lnk" onclick="gStop()">Parar</button></div>`)}
+const mStack=()=>`<div class="mrow"><button class="mfab" aria-label="Centralizar na minha posição" title="Centralizar na minha posição" onclick="mCenter()">${IC.loc}</button><button class="msb" onclick="pkStart()">${IC.pin} Marcar no mapa</button></div>`;
+function gresClear(){const g=$("#gres");if(g){g.className="";g.innerHTML=""}}
+function toast(t){const e=$("#mtoast");if(!e)return;e.textContent=t;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>{e.style.display="none"},3500)}
+function gCollect(){if(!gp)return;const c=gp.coords;coll={lat:c.latitude,lon:c.longitude,acc:c.accuracy,alt:c.altitude,altAcc:c.altitudeAccuracy,ts:gp.timestamp};gForm()}
+function gForm(){const el=$("#gres");if(!el||!coll)return;el.className="sheet";
+ el.innerHTML=`<b>Ponto coletado</b>
+<p style="margin:8px 0">Datum: <b>WGS84</b><br>Latitude: <b>${gF(coll.lat,7)}</b><br>Longitude: <b>${gF(coll.lon,7)}</b>${coll.man?`<br>Origem: <b>marcado no mapa</b>`:`<br>Precisão horizontal: <b>± ${gF(coll.acc,1)} m</b>${coll.alt!=null?`<br>Altitude: <b>${gF(coll.alt,1)} m</b>${coll.altAcc!=null?` (± ${gF(coll.altAcc,1)} m)`:""}`:""}`}<br>Data e hora: <b>${new Date(coll.ts).toLocaleString("pt-BR")}</b></p>${!coll.man&&coll.acc>20?`<p style="color:var(--wa);margin:0 0 8px">Precisão acima de 20 m. Se puder, aguarde o GPS estabilizar e colete de novo.</p>`:""}
+<label>Nome do ponto<input id="gname" value="Ponto ${(S.points||[]).length+1}"></label>
+${grpPicker("ggrp","ggn",lastG)}
+<label>Anotações<textarea id="gnote" rows="3" placeholder="Anotações relevantes sobre este ponto" style="width:100%;box-sizing:border-box;font-size:16px;padding:10px;margin-top:4px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)"></textarea></label>
+<p id="ggm" style="color:var(--er);margin:6px 0 0"></p><div class="row" style="margin-top:8px"><button class="sm" style="background:var(--mut)" onclick="coll=null;gresClear()">Descartar</button><button class="sm" onclick="gSave()">Salvar ponto</button></div>`}
+function gSave(){if(!coll)return;const gid=grpResolve("ggrp","ggn");if(!gid){$("#ggm").textContent="Informe o nome do novo grupo.";return}
+ S.points.push({id:Date.now().toString(36),...coll,datum:"WGS84",name:($("#gname").value||"").trim(),note:$("#gnote").value.trim(),gid});lastG=gid;save();coll=null;
+ const g=S.groups.find(x=>x.id==gid);gresClear();toast(`Ponto salvo no grupo "${g.name}".`);gDraw()}
+function askDelP(id){$("#p_"+id).innerHTML=`<b style="color:var(--er)">Excluir este ponto?</b><br>Este ponto não poderá ser recuperado.<div class="row" style="margin-top:8px"><button class="sm" style="background:var(--mut)" onclick="gList()">Cancelar</button><button class="sm" style="background:var(--er)" onclick="delP('${id}')">Excluir ponto</button></div>`}
+function delP(id){gsel.delete(id);S.points=S.points.filter(p=>p.id!=id);save();gList();gDraw()}
+function fert(){app.innerHTML=`<button class="lnk" onclick="go('home')">‹ Início</button><h2>Teste de distribuição de fertilizantes</h2>`+(S.machines.length?S.machines.map(m=>`<div class="card tap" onclick="go('machine','${m.id}')"><b>${esc(m.fleet)}</b> · ${esc(m.brand)} ${esc(m.model)}<br><small>${m.adj.map(a=>AD[a].split(" (")[0]).join(" + ")} · ${S.tests.filter(t=>t.mid==m.id).length} teste(s)</small></div>`).join(""):`<p class="mut">Nenhum equipamento cadastrado.</p>`)+`<button class="btn" onclick="go('form')">+ Adicionar equipamento</button>`}
+function form(){app.innerHTML=`<button class="lnk" onclick="go('fert')">‹ Voltar</button><h2>Novo equipamento</h2>
+<label>Frota / identificador<input id="fl" placeholder="DN257"></label>
+<label>Marca<select id="br">${S.brands.map(b=>`<option>${esc(b)}</option>`).join("")}</select></label>
+<div class="row"><input id="nb" placeholder="Nova marca"><button class="sm" onclick="addB()">+ Marca</button></div>
+<label>Modelo<input id="md" placeholder="RG1300B"></label>
+<p class="mut">Mecanismos de regulagem (marque um ou mais)</p>
+${Object.keys(AD).map(k=>`<label class="chk"><input type="checkbox" class="ad" value="${k}"> ${AD[k]}</label>`).join("")}
+<p id="err" style="color:var(--er)"></p><button class="btn" onclick="saveM()">Salvar equipamento</button>`}
+function addB(){const v=$("#nb").value.trim(),fl=$("#fl").value,md=$("#md").value;if(v&&!S.brands.includes(v)){S.brands.push(v);save()}form();$("#fl").value=fl;$("#md").value=md;if(v)$("#br").value=v}
+function saveM(){const fleet=$("#fl").value.trim(),model=$("#md").value.trim(),adj=[...document.querySelectorAll(".ad:checked")].map(e=>e.value);
+ if(!fleet||!model||!adj.length){$("#err").textContent="Informe frota, modelo e ao menos um mecanismo.";return}
+ const id=Date.now().toString(36);S.machines.push({id,fleet,brand:$("#br").value,model,adj});save();go("machine",id)}
+function machine(id){const m=M(id),ts=S.tests.filter(t=>t.mid==id).reverse();
+ app.innerHTML=`<button class="lnk" onclick="go('fert')">‹ Equipamentos</button><h2>${esc(m.fleet)} · ${esc(m.brand)} ${esc(m.model)}</h2>
+<button class="btn" onclick="chooseType('${id}')">Novo teste de bandeja</button><h3>Histórico</h3>`+
+ (ts.length?ts.map(t=>`<div class="card" id="t_${t.id}"><b style="color:${col(t.main)}">${t.tipo==="A"?"Ef. "+U(t,t.ef.c)+" (cont.)":"CV "+F(t.main)+"%"}</b> · ${esc(t.product)} · ${t.tipo==="A"?"Adulanço":"Teste em S"} · ${t.date}<br><small>${t.tipo==="A"?`CV≤${t.lim}% · ef. cont ${U(t,t.ef.c)} · alt.D ${U(t,t.ef.d)} · alt.E ${U(t,t.ef.e)} · `:""}${t.n} bandejas · média ${F(t.mean)} g${t.width?" · faixa "+t.width+" m":""}${t.rpm?" · "+t.rpm+" rpm":""}${t.wind?" · vento "+t.wind+" km/h":""}${Object.keys(t.adj).filter(k=>t.adj[k]!=="").map(k=>" · "+AD[k].split(" (")[0]+" "+t.adj[k]).join("")}</small><div>${(t.tipo!=="A"||t.B!==undefined)?`<button class="lnk" style="padding:2px 0;font-size:14px" onclick="pdfT('${t.id}')">Exportar PDF</button> · `:""}<button class="lnk" style="color:var(--er);padding:2px 0;font-size:14px" onclick="askDelT('${t.id}')">Excluir teste</button> <span id="pm_${t.id}" class="mut" style="font-size:13px"></span></div></div>`).join(""):`<p class="mut">Nenhum teste ainda.</p>`)+`<div id="del" style="margin-top:24px"><button class="lnk" style="color:var(--er)" onclick="askDel('${id}')">Excluir equipamento</button></div>`}
+function askDelT(id){$("#t_"+id).innerHTML=`<b style="color:var(--er)">Excluir este teste?</b><br>Este teste não poderá ser recuperado.<div class="row" style="margin-top:8px"><button class="sm" style="background:var(--mut)" onclick="machine('${S.tests.find(t=>t.id==id).mid}')">Cancelar</button><button class="sm" style="background:var(--er)" onclick="delT('${id}')">Excluir teste</button></div>`}
+function delT(id){const t=S.tests.find(x=>x.id==id);S.tests=S.tests.filter(x=>x.id!=id);save();machine(t.mid)}
+function askDel(id){const n=S.tests.filter(t=>t.mid==id).length;$("#del").innerHTML=`<div class="card" style="border-color:var(--er)">Excluir este equipamento${n?` e seus ${n} teste(s)`:""}? Não dá para desfazer.<div class="row" style="margin-top:8px"><button class="sm" style="background:var(--mut)" onclick="machine('${id}')">Cancelar</button><button class="sm" style="background:var(--er)" onclick="delM('${id}')">Excluir</button></div></div>`}
+function delM(id){S.machines=S.machines.filter(m=>m.id!=id);S.tests=S.tests.filter(t=>t.mid!=id);save();go("fert")}
+function chooseType(id){const m=M(id);window.scrollTo(0,0);app.innerHTML=`<button class="lnk" onclick="machine('${id}')">‹ ${esc(m.fleet)}</button><h2>Novo teste de bandeja</h2><p class="mut">Escolha o tipo de teste</p><button class="btn" onclick="go('test','${id}')">Teste em S</button><button class="btn" onclick="adu('${id}')">Adulanço</button>`}
+function adulanco(id){app.innerHTML=`<button class="lnk" onclick="chooseType('${id}')">‹ Tipos de teste</button><h2>Adulanço</h2><div class="card"><p class="mut" style="margin:0">Metodologia em definição.</p></div>`}
+let A=null;
+const U=(t,v)=>t.un==="b"?(v||"–")+" band.":F(v,2)+" m";
+const ai=(l,k)=>`<label>${l}<input type="number" step="any" inputmode="decimal" value="${A[k]}" ${k=="N"||k=="B"?`onchange="aSet('${k}',this.value)"`:`oninput="A.${k}=this.value;acalc()"`}></label>`;
+const aLR=()=>{const L=Math.floor((A.N-A.B)/2);return[L,A.N-A.B-L]};
+const aLab=i=>{const[L]=aLR();return i<L?"E"+(L-i):i<L+A.B?"M"+(i-L+1):"D"+(i-L-A.B+1)};
+function aSize(){A.v=Array.from({length:A.N},(_,i)=>A.v[i]??"")}
+function aSet(k,v){v=Math.round(+v)||0;if(k=="N")A.N=Math.min(Math.max(v,3),300);else A.B=v;A.B=Math.min(Math.max(A.B,0),A.N);aSize();drawA()}
+function adu(id){const l=S.tests.filter(t=>t.mid==id&&t.tipo==="A"&&t.B!==undefined).slice(-1)[0]||{};
+ A={mid:id,N:l.N||15,B:l.B??1,product:l.product||S.products[0],rate:"",rpm:"",wind:"",adj:{},lim:l.lim||20,W:l.W||"",sim:{c:"",a:""},v:[]};aSize();drawA()}
+function drawA(){const m=M(A.mid),[L,R]=aLR();window.scrollTo(0,0);
+ app.innerHTML=`<button class="lnk" onclick="chooseType('${A.mid}')">‹ Tipos de teste</button><h2>Adulanço</h2>
+<div class="card"><div class="g2">${ai("Nº total de bandejas","N")}${ai("Bandejas abaixo da máquina","B")}${ai("Largura de trabalho (m)","W")}${ai("CV limite (%)","lim")}
+<label>Produto<select onchange="A.product=this.value">${S.products.map(p=>`<option ${p==A.product?"selected":""}>${esc(p)}</option>`).join("")}</select></label>${ai("Taxa alvo (kg/ha)","rate")}${ai("RPM dos discos","rpm")}${ai("Vento (km/h, opcional)","wind")}</div>
+<p class="mut" style="margin:4px 0">Esquerda: ${L} · Abaixo da máquina: ${A.B} · Direita: ${R}</p>
+${m.adj.map(k=>`<label>${AD[k]}<input type="number" step="any" inputmode="decimal" placeholder="ex: -2,5" value="${A.adj[k]??""}" oninput="A.adj['${k}']=this.value"></label>`).join("")}</div>
+<div class="card"><b>Massa por bandeja (g)</b><p class="mut" style="margin:2px 0 8px">Da esquerda (E) para a direita (D), atrás da máquina (M). Deixe em branco a bandeja que não foi colocada (será interpolada). A primeira e a última são obrigatórias.</p><div id="at"></div></div><div id="ares"></div>`;aTable();acalc()}
+function aTable(){$("#at").innerHTML=`<div class="sg">`+A.v.map((x,i)=>`<label>${aLab(i)}<input type="number" step="any" inputmode="decimal" value="${x}" oninput="A.v[${i}]=this.value;acalc()"></label>`).join("")+`</div>`}
+function aProf(){const m=A.v.map(x=>x===""||!isFinite(+x)?null:+x),n=m.length;
+ if(m[0]===null||m[n-1]===null)return{err:"Preencha a primeira e a última bandeja (elas ancoram a interpolação)."};
+ const it=Array(n).fill(false);let p=0;for(let i=1;i<n;i++)if(m[i]!==null){for(let j=p+1;j<i;j++){m[j]=m[p]+(m[i]-m[p])*(j-p)/(i-p);it[j]=true}p=i}
+ const[L,R]=aLR(),s=Math.max(L,R),za=Array(s-L).fill(0),zb=Array(s-R).fill(0);
+ return{u:m,y:[...za,...m,...zb],it:[...za.map(()=>false),...it,...zb.map(()=>false)]}}
+function aCV(y){const N=y.length,c=N>>1,out=[];
+ for(let k=2;k<=N;k++){const cs=Array(k).fill(0),P=2*k,al=Array(P).fill(0);
+  y.forEach((v,t)=>{cs[t%k]+=v;al[t%P]+=v;al[(t+k)%P]+=y[N-1-t]});
+  const R=(a,b)=>{const z=[];for(let i=a;i<b;i++)z.push(al[(c+i)%P]);return st(z).cv};
+  out.push({k,c:st(cs).cv,d:R(0,k),e:R(k,2*k)})}
+ return out}
+const ef=(o,key,L)=>{for(let i=o.length-1;i>=0;i--)if(o[i][key]<=L)return o[i].k;return 0};
+function acalc0(){const el=$("#ares");cur=null;const P=aProf();if(P.err)return el.innerHTML=`<p class="mut">${P.err}</p>`;
+ const{y,it,u}=P,N=y.length,L=+A.lim||20,o=aCV(y),E={c:ef(o,"c",L),d:ef(o,"d",L),e:ef(o,"e",L)},Wd=+A.W>0?A.W/A.N:0,avg=u.reduce((a,b)=>a+b,0)/u.length;
+ const mx=Math.max(...y)*1.15||1,bw=300/N,bars=y.map((t,i)=>`<rect x="${20+i*bw}" y="${140-t/mx*120}" width="${Math.max(bw-.6,.6)}" height="${t/mx*120}" fill="var(--ac)" opacity="${it[i]?.35:.9}"/>`).join("");
+ const cm=Math.min(Math.max(...o.map(r=>Math.max(r.c,r.d,r.e))),60)||1,X=k=>20+(k-2)/((N-2)||1)*300,Y=v=>140-Math.min(v,cm)/cm*120;
+ const line=(key,cl)=>`<polyline fill="none" stroke="${cl}" stroke-width="1.6" points="${o.map(r=>X(r.k).toFixed(1)+","+Y(r[key]).toFixed(1)).join(" ")}"/>`,Wf=k=>k?(Wd?F(k*Wd,2)+" m ("+k+" bandejas)":k+" bandejas"):"nenhuma";
+ A.pf={y,Wd,E:{...E,a:(m=>m.length?Math.min(...m):0)([E.d,E.e].filter(Boolean))}};cur={tipo:"A",mid:A.mid,N:A.N,B:A.B,n:A.N,product:A.product,rate:A.rate,rpm:A.rpm,wind:A.wind,adj:{...A.adj},v:[...A.v],W:A.W,un:Wd?"m":"b",lim:L,ef:Wd?{c:E.c*Wd,d:E.d*Wd,e:E.e*Wd}:E,mean:avg,main:E.c?o[E.c-2].c:0,date:new Date().toLocaleDateString("pt-BR"),id:Date.now().toString(36)};
+ el.innerHTML=`<div class="card"><b>Perfil de distribuição</b><svg viewBox="0 0 340 160" width="100%">${bars}</svg><small>Barras claras = bandejas interpoladas · média ${F(avg)} g${Wd?` · bandejas distribuídas uniformemente: ${F(Wd,2)} m cada`:""}</small></div>
+<div class="card"><b>CV% × largura de trabalho (${Wd?"m":"em bandejas"})</b><svg viewBox="0 0 340 160" width="100%"><line x1="20" x2="320" y1="${Y(L)}" y2="${Y(L)}" stroke="var(--mut)" stroke-dasharray="4 4"/>${line("c","#ef4444")}${line("d","#eab308")}${line("e","#3b82f6")}<text x="20" y="156" font-size="9" fill="var(--mut)">${Wd?F(2*Wd,1)+" m":"2"}</text><text x="320" y="156" font-size="9" text-anchor="end" fill="var(--mut)">${Wd?F(N*Wd,1)+" m":N+" bandejas"}</text></svg>
+<small><span style="color:#ef4444">━</span> Contínuo · <span style="color:#eab308">━</span> Alternado direito · <span style="color:#3b82f6">━</span> Alternado esquerdo · tracejado: CV limite ${L}%</small></div>
+<div class="card" style="border:2px solid var(--ac)"><small>LARGURA EFETIVA (maior largura com CV ≤ ${L}%)</small><p style="margin:6px 0 0">Contínuo: <b>${Wf(E.c)}</b><br>Alternado direito: <b>${Wf(E.d)}</b><br>Alternado esquerdo: <b>${Wf(E.e)}</b></p></div>
+<div class="card"><b>Simulação do traçado</b><p class="mut" style="margin:2px 0 8px">Largura de cada passada (${Wd?"m":"bandejas"}). Em branco = largura efetiva (no alternado, a menor entre direito e esquerdo).</p><div class="g2">${si("Contínuo","c")}${si("Alternado","a")}</div><div id="asimg"></div></div>
+<button class="btn" onclick="saveT()">Salvar teste no histórico</button>`}
+const si=(l,k)=>`<label>${l}<input type="number" step="any" inputmode="decimal" placeholder="${A.pf.Wd?F(A.pf.E[k]*A.pf.Wd,2):A.pf.E[k]||""}" value="${A.sim[k]}" oninput="A.sim.${k}=this.value;aSimDraw()"></label>`;
+function acalc(){A.pf=null;acalc0();aSimDraw()}
+function aSimDraw(){const el=$("#asimg");if(!el||!A.pf)return;const{y,Wd,E}=A.pf,N=y.length,c=N>>1,my=Math.max(...y)||1,fm=k=>Wd?F(k*Wd,2)+" m":k+" bandejas";
+ const kk=key=>{const v=parseFloat(String(A.sim[key]).replace(",","."));return Math.min(Math.max(v>0?Math.round(Wd?v/Wd:v):(E[key]||Math.round(N/2)),2),2*N)};
+ const kc=kk("c"),ka=kk("a");
+ const sim=(k,alt,par,span)=>{const q=Math.ceil(N/k),q2=par===null?q:q+((q%2)!==par?1:0),np=Math.min(q2+span+1+Math.ceil(q/2),14),pos=[];for(let p=0;p<np;p++)pos.push(p*k);
+  const len=pos[np-1]+N,g=Array(len).fill(0);pos.forEach((o,p)=>{for(let t=0;t<N;t++)g[o+t]+=(alt&&p%2)?y[N-1-t]:y[t]});
+  const a=pos[q2]+c,b=Math.min(pos[q2+span]+c,len),z=g.slice(a,b),s=z.length>1?st(z):{m:0,cv:NaN};
+  const sx=300/len,bh=12,top=np*14+8,gh=90,gm=Math.max(...g)*1.1||1,base=top+gh;
+  const area=(arr,x0,yb,h,mx)=>{let s="M"+(20+x0*sx).toFixed(1)+","+yb;arr.forEach((v,i)=>{const yy=(yb-v/mx*h).toFixed(1);s+="L"+(20+(x0+i)*sx).toFixed(1)+","+yy+"L"+(20+(x0+i+1)*sx).toFixed(1)+","+yy});return s+"L"+(20+(x0+arr.length)*sx).toFixed(1)+","+yb+"Z"};
+  let svg=`<svg viewBox="0 0 340 ${base+6}" width="100%">`;
+  pos.forEach((o,p)=>{const arr=(alt&&p%2)?[...y].reverse():y,x=(20+(o+c)*sx).toFixed(1);svg+=`<path d="${area(arr,o,4+p*14+bh,bh,my)}" fill="var(--ink)" opacity=".55"/><line x1="${x}" x2="${x}" y1="${4+p*14}" y2="${base}" stroke="var(--mut)" stroke-dasharray="3 3" opacity=".6"/>${(alt&&p%2&&o*sx>34)?`<text x="${(17+o*sx).toFixed(1)}" y="${4+p*14+bh-2}" font-size="7" text-anchor="end" fill="var(--mut)">espelhada</text>`:""}`});
+  const my2=(base-s.m/gm*gh).toFixed(1);
+  svg+=`<rect x="${(20+a*sx).toFixed(1)}" y="${top}" width="${((b-a)*sx).toFixed(1)}" height="${gh}" fill="var(--ac)" opacity=".15"/><path d="${area(g,0,base,gh,gm)}" fill="#16a34a" opacity=".85"/><line x1="${(20+a*sx).toFixed(1)}" x2="${(20+b*sx).toFixed(1)}" y1="${my2}" y2="${my2}" stroke="var(--ink)" stroke-dasharray="5 4"/></svg>`;
+  return{svg,cv:s.cv}};
+ const C=sim(kc,false,null,1),D=sim(ka,true,0,2),h=(t,k,r)=>`<p style="margin:10px 0 2px"><b>${t}</b> · ${fm(k)} · CV na região destacada: <b>${F(r.cv,2)}%</b></p>`;
+ el.innerHTML=h("Contínuo",kc,C)+C.svg+h("Alternado",ka,D)+D.svg+`<small>Passadas em cinza (no alternado, as ímpares são espelhadas) · verde = distribuição no solo · faixa clara = região usada no CV · tracejado = dose média</small>`}
+async function dl(name,data){try{const d=window.claude&&await claude.use("downloads");if(d){await d.save({filename:name,data});return"ok"}}catch(e){if(e&&e.code=="declined")return"declined"}
+ try{const b=data instanceof Blob?data:new Blob([data]),u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(u)},4000);return"ok"}catch(e){return"erro"}}
+function mkPdf(){const pages=[];let o;const L=s=>String(s).replace(/≤/g,"<=").replace(/[–—]/g,"-").replace(/…/g,"...").replace(/[^\x00-\xFF]/g,"?").replace(/[\\()]/g,m=>"\\"+m);
+ const Y=y=>(842-y).toFixed(1),n=v=>(+v).toFixed(2),H=c=>{const v=parseInt(c.slice(1),16);return[(v>>16)/255,(v>>8&255)/255,(v&255)/255].map(x=>x.toFixed(3)).join(" ")};
+ return{page(){o=[];pages.push(o)},
+  text(x,y,s,sz=10,b=0,c="#000000",al=0){s=String(s);const w=s.length*sz*(b?.55:.5);o.push(`BT /F${b?2:1} ${sz} Tf ${H(c)} rg ${n(al==1?x-w:x)} ${Y(y)} Td (${L(s)}) Tj ET`)},
+  rect(x,y,w,h,f,s){o.push(`q ${f?H(f)+" rg ":""}${s?H(s)+" RG ":""}0.5 w ${n(x)} ${Y(y+h)} ${n(w)} ${n(h)} re ${f&&s?"B":f?"f":"S"} Q`)},
+  line(x1,y1,x2,y2,c,w=.6,d){o.push(`q ${H(c)} RG ${w} w ${d?"[3 3] 0 d ":""}${n(x1)} ${Y(y1)} m ${n(x2)} ${Y(y2)} l S Q`)},
+  poly(p,f,s,w=1){if(p.length<2)return;o.push(`q ${f?H(f)+" rg ":""}${s?H(s)+" RG ":""}${w} w ${p.map((q,i)=>n(q[0])+" "+Y(q[1])+(i?" l":" m")).join(" ")} ${f&&s?"B":f?"f":"S"} Q`)},
+  finish(){const ob=[];ob[1]="<< /Type /Catalog /Pages 2 0 R >>";ob[2]=`<< /Type /Pages /Kids [${pages.map((_,i)=>`${5+2*i} 0 R`).join(" ")}] /Count ${pages.length} >>`;
+   ob[3]="<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>";ob[4]="<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>";
+   pages.forEach((p,i)=>{const s=p.join("\n");ob[5+2*i]=`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${6+2*i} 0 R >>`;ob[6+2*i]=`<< /Length ${s.length} >>\nstream\n${s}\nendstream`});
+   let out="%PDF-1.4\n",off=[];for(let i=1;i<ob.length;i++){off[i]=out.length;out+=`${i} 0 obj\n${ob[i]}\nendobj\n`}
+   const xr=out.length;out+=`xref\n0 ${ob.length}\n0000000000 65535 f \n`+off.slice(1).map(v=>String(v).padStart(10,"0")+" 00000 n \n").join("")+`trailer\n<< /Size ${ob.length} /Root 1 0 R >>\nstartxref\n${xr}\n%%EOF`;
+   const u=new Uint8Array(out.length);for(let i=0;i<out.length;i++)u[i]=out.charCodeAt(i)&255;return new Blob([u],{type:"application/pdf"})}}}
+function pBars(g,x,y,w,h,v,col,it,mean){const mx=Math.max(...v)*1.15||1,bw=w/v.length;g.rect(x,y,w,h,null,"#999999");
+ v.forEach((q,i)=>g.rect(x+i*bw+.4,y+h-q/mx*h,Math.max(bw-.8,.5),q/mx*h,it&&it[i]?"#a7f3d0":col));
+ if(mean!=null){const my=y+h-mean/mx*h;g.line(x,my,x+w,my,"#000000",.8,1);g.text(x+w,my-3,"média "+F(mean)+" g",8,0,"#000000",1)}
+ g.text(x-3,y+6,F(mx,0),7,0,"#555555",1);g.text(x-3,y+h,"0",7,0,"#555555",1)}
+function pCV(g,x,y,w,h,o,N,L,Wd){const cm=Math.min(Math.max(...o.map(r=>Math.max(r.c,r.d,r.e))),60)||1,X=k=>x+(k-2)/((N-2)||1)*w,V=v=>y+h-Math.min(v,cm)/cm*h;g.rect(x,y,w,h,null,"#999999");
+ [["c","#ef4444"],["d","#eab308"],["e","#3b82f6"]].forEach(([k,c])=>g.poly(o.map(r=>[X(r.k),V(r[k])]),null,c,1.2));
+ g.line(x,V(L),x+w,V(L),"#555555",.7,1);g.text(x+w,V(L)-3,"CV limite "+L+"%",7,0,"#555555",1);
+ g.text(x-3,y+6,F(cm,0)+"%",7,0,"#555555",1);g.text(x-3,y+h,"0",7,0,"#555555",1);g.text(x,y+h+10,Wd?F(2*Wd,1)+" m":"2",7,0,"#555555");g.text(x+w,y+h+10,Wd?F(N*Wd,1)+" m":N+" bandejas",7,0,"#555555",1)}
+function simGeo(y,k,alt,par,span){const N=y.length,c=N>>1,q=Math.ceil(N/k),q2=par===null?q:q+((q%2)!==par?1:0),np=Math.min(q2+span+1+Math.ceil(q/2),14),pos=[];for(let p=0;p<np;p++)pos.push(p*k);
+ const len=pos[np-1]+N,g=Array(len).fill(0);pos.forEach((o,p)=>{for(let t=0;t<N;t++)g[o+t]+=(alt&&p%2)?y[N-1-t]:y[t]});
+ const a=pos[q2]+c,b=Math.min(pos[q2+span]+c,len),z=g.slice(a,b);return{pos,g,a,b,np,len,c,s:z.length>1?st(z):{m:0,cv:NaN}}}
+function pSim(g,x,y,w,yv,k,alt,par,span){const G=simGeo(yv,k,alt,par,span),sx=w/G.len,bh=7,top=y+G.np*9+4,gh=80,base=top+gh,my=Math.max(...yv)||1,gm=Math.max(...G.g)*1.1||1;
+ const step=(a,x0,yb,hh,mx)=>{const P=[[x+x0*sx,yb]];a.forEach((v,i)=>{const yy=yb-v/mx*hh;P.push([x+(x0+i)*sx,yy],[x+(x0+i+1)*sx,yy])});P.push([x+(x0+a.length)*sx,yb]);return P};
+ G.pos.forEach((o,p)=>{g.poly(step((alt&&p%2)?[...yv].reverse():yv,o,y+p*9+bh,bh,my),"#9ca3af");g.line(x+(o+G.c)*sx,y+p*9,x+(o+G.c)*sx,base,"#bbbbbb",.4,1)});
+ g.poly(step(G.g,0,base,gh,gm),"#16a34a");g.rect(x+G.a*sx,top,(G.b-G.a)*sx,gh,null,"#065f46");
+ const mm=base-G.s.m/gm*gh;g.line(x+G.a*sx,mm,x+G.b*sx,mm,"#000000",.8,1);return{h:base-y,cv:G.s.cv}}
+async function pdfT(id){const t=S.tests.find(x=>x.id==id),pm=$("#pm_"+id),say=s=>{if(pm)pm.textContent=s};
+ try{const m=M(t.mid),g=mkPdf(),isA=t.tipo==="A";g.page();let y=44;
+  g.text(36,y,"Relatório do teste de bandeja",16,1,"#065f46");y+=15;g.text(36,y,isA?"Método Adulanço":"Teste em S",11,0,"#444444");y+=8;g.line(36,y,559,y,"#10b981",1);y+=16;
+  const Wv=+(isA?t.W:t.width)>0?(isA?t.W:t.width)+" m":"-";
+  const rows=[["Equipamento",`${m.fleet} - ${m.brand} ${m.model}`],["Data",t.date],["Produto",t.product],["Taxa alvo",t.rate?t.rate+" kg/ha":"-"],["Largura de trabalho",Wv],["RPM dos discos",t.rpm||"-"],["Vento",t.wind?t.wind+" km/h":"-"],isA?["Bandejas (total / abaixo da máquina)",`${t.N} / ${t.B}`]:["Número de bandejas",t.n]];
+  rows.forEach((r,i)=>{const cx=i%2?300:36,cy=y+Math.floor(i/2)*14;g.text(cx,cy,r[0]+":",9,1);g.text(cx+r[0].length*4.9+8,cy,r[1],9)});y+=Math.ceil(rows.length/2)*14+4;
+  g.text(36,y,"Regulagens:",9,1);m.adj.forEach((k,i)=>{g.text(100+i*150,y,AD[k].split(" (")[0]+": "+(t.adj&&t.adj[k]!==undefined&&t.adj[k]!==""?t.adj[k]:"-"),9)});y+=16;
+  if(!isA){const v=t.v.map(Number),s=st(v);g.text(36,y,"Massa coletada por bandeja (g)",10,1);y+=8;pBars(g,56,y,490,150,v,"#10b981",null,s.m);y+=166;
+   g.text(36,y,"Resultados",11,1);y+=15;g.text(36,y,`Média: ${F(s.m)} g   |   Desvio padrão: ${F(s.sd,2)} g`,10);y+=14;
+   g.text(36,y,`CV do perfil das bandejas: ${F(t.cv,2)}%`,10);y+=14;if(+t.width>0){g.text(36,y,`CV com sobreposição (faixa de ${t.width} m): ${F(t.main,2)}%`,10,1);y+=14}
+   const c=t.main;g.text(36,y,c<=10?"Classificação: excelente (até 10%)":c<=15?"Classificação: aceitável (10% a 15%)":"Classificação: alta variabilidade (acima de 15%)",10)}
+  else{const sv=A;A={N:t.N,B:t.B,v:t.v,W:t.W||"",lim:t.lim};const P=aProf();const aN=A.N;A=sv;
+   if(P.err)throw new Error(P.err);const{y:yy,it,u}=P,N=yy.length,Lm=t.lim,o=aCV(yy),Wd=+t.W>0?t.W/aN:0,E={c:ef(o,"c",Lm),d:ef(o,"d",Lm),e:ef(o,"e",Lm)},avg=u.reduce((a,b)=>a+b,0)/u.length;
+   g.text(36,y,"Perfil de distribuição (g por bandeja; verde claro = interpolada)",10,1);y+=8;pBars(g,56,y,490,120,yy,"#10b981",it,avg);y+=142;
+   g.text(36,y,`CV% x largura de trabalho${Wd?" (m)":" (em bandejas)"}  -  vermelho: contínuo | amarelo: alternado direito | azul: alternado esquerdo`,9,1);y+=8;pCV(g,56,y,490,130,o,N,Lm,Wd);y+=156;
+   const Wf=k=>k?(Wd?F(k*Wd,2)+" m ("+k+" bandejas)":k+" bandejas"):"nenhuma";g.text(36,y,`Largura efetiva (maior largura com CV <= ${Lm}%)`,11,1);y+=15;
+   [["Contínuo",E.c,"c"],["Alternado direito",E.d,"d"],["Alternado esquerdo",E.e,"e"]].forEach(([nm,k,key])=>{g.text(36,y,`${nm}: ${Wf(k)}${k?`  (CV ${F(o[k-2][key],2)}%)`:""}`,10);y+=13});
+   g.page();y=44;g.text(36,y,"Simulação do traçado",14,1,"#065f46");y+=18;
+   const kc=E.c||Math.round(N/2),mm=[E.d,E.e].filter(Boolean),ka=mm.length?Math.min(...mm):Math.round(N/2),fm=k=>Wd?F(k*Wd,2)+" m":k+" bandejas";
+   g.text(36,y,"Contínuo (mesma orientação em todas as passadas)",10,1);y+=6;let r=pSim(g,56,y,490,yy,kc,false,null,1);y+=r.h+14;g.text(36,y,`Largura ${fm(kc)}  |  CV na região destacada: ${F(r.cv,2)}%`,10);y+=26;
+   g.text(36,y,"Alternado (vai e vem, passadas ímpares espelhadas)",10,1);y+=6;r=pSim(g,56,y,490,yy,ka,true,0,2);y+=r.h+14;g.text(36,y,`Largura ${fm(ka)}  |  CV na região destacada: ${F(r.cv,2)}%`,10);y+=14;
+   g.text(36,y,"Contorno = região usada no CV  |  linha tracejada = dose média  |  verde = distribuição no solo",8,0,"#555555")}
+  const nm=`teste-${m.fleet}-${isA?"adulanco":"s"}-${String(t.date).replace(/\//g,"-")}`.replace(/[^A-Za-z0-9-]/g,"")+".pdf",res=await dl(nm,g.finish());
+  say(res=="ok"?"PDF gerado.":res=="declined"?"Cancelado.":"Não foi possível salvar o PDF.")}catch(e){say("Não foi possível gerar o PDF.")}}
+const srt=(a,k)=>[...a].sort((x,y)=>String(x[k]).localeCompare(String(y[k]),"pt-BR",{numeric:true,sensitivity:"base"}));
+const fmtD=d=>d?d.split("-").reverse().join("/"):"";
+const farmsOf=cid=>S.farms.filter(f=>f.cid==cid),fieldsOf=fid=>S.fields.filter(t=>t.fid==fid);
+const haSum=a=>a.reduce((s,t)=>s+(+t.area||0),0),fmHa=v=>(+v).toLocaleString("pt-BR",{maximumFractionDigits:2})+" ha";
+const bk=(on,t)=>`<button class="lnk" onclick="${on}">‹ ${t}</button>`;
+function cli(){app.innerHTML=bk("go('home')","Início")+`<h2>Clientes, fazendas e talhões</h2>`+(S.clients.length?srt(S.clients,"name").map(c=>{const fs=farmsOf(c.id),n=fs.reduce((s,f)=>s+fieldsOf(f.id).length,0);return`<div class="card tap" onclick="go('cliente','${c.id}')"><b>${esc(c.name)}</b><br><small>${fs.length} fazenda(s) · ${n} talhão(ões)</small></div>`}).join(""):`<p class="mut">Nenhum cliente cadastrado.</p>`)+`<button class="btn" onclick="go('cform','')">+ Adicionar cliente</button>`}
+function cform(id){const c=id?S.clients.find(x=>x.id==id):null;
+ app.innerHTML=bk(c?`go('cliente','${id}')`:"go('cli')","Voltar")+`<h2>${c?"Editar cliente":"Novo cliente"}</h2><label>Nome do cliente<input id="cn" value="${esc(c?c.name:"")}"></label><label>Observações (contato, etc.)<textarea id="co" rows="3" ${TA}>${esc(c?c.note||"":"")}</textarea></label><p id="err" style="color:var(--er)"></p><button class="btn" onclick="saveC('${id||""}')">Salvar cliente</button>`}
+function saveC(id){const name=$("#cn").value.trim(),note=$("#co").value.trim();if(!name){$("#err").textContent="Informe o nome do cliente.";return}
+ if(id){const c=S.clients.find(x=>x.id==id);c.name=name;c.note=note}else{id=Date.now().toString(36);S.clients.push({id,name,note})}save();go("cliente",id)}
+function cliente(id){const c=S.clients.find(x=>x.id==id);if(!c)return cli();const fs=srt(farmsOf(id),"name");
+ app.innerHTML=bk("go('cli')","Clientes")+`<h2>${esc(c.name)}</h2>`+(c.note?`<p class="mut" style="margin:0 0 6px">${esc(c.note)}</p>`:"")+`<div><button class="lnk" style="padding:2px 0;font-size:14px" onclick="go('cform','${id}')">Editar cliente</button></div><h3>Fazendas</h3>`+
+ (fs.length?fs.map(f=>{const ts=fieldsOf(f.id);return`<div class="card tap" onclick="go('fazenda','${f.id}')"><b>${esc(f.name)}</b>${f.city?` · ${esc(f.city)}`:""}<br><small>${ts.length} talhão(ões) · ${fmHa(haSum(ts))}</small></div>`}).join(""):`<p class="mut">Nenhuma fazenda cadastrada.</p>`)+
+ `<button class="btn" onclick="go('fform','${id}|')">+ Adicionar fazenda</button><div id="del" style="margin-top:24px"><button class="lnk" style="color:var(--er)" onclick="askDelC('${id}')">Excluir cliente</button></div>`}
+function askDelC(id){const fs=farmsOf(id),n=fs.reduce((x,f)=>x+fieldsOf(f.id).length,0),m=fs.reduce((x,f)=>x+S.safras.filter(q=>q.fid==f.id).length,0);$("#del").innerHTML=`<div class="card" style="border-color:var(--er)">Excluir este cliente${fs.length?` e suas ${fs.length} fazenda(s)${n?`, ${n} talhão(ões)`:""}${m?` e ${m} safra(s)`:""}`:""}? Não dá para desfazer.<div class="row" style="margin-top:8px"><button class="sm" style="background:var(--mut)" onclick="cliente('${id}')">Cancelar</button><button class="sm" style="background:var(--er)" onclick="delC('${id}')">Excluir</button></div></div>`}
+function rmFarm(fid){const ss=S.safras.filter(q=>q.fid==fid).map(q=>q.id);S.cultivos=S.cultivos.filter(c=>!ss.includes(c.sid));S.safras=S.safras.filter(q=>q.fid!=fid);S.fields=S.fields.filter(t=>t.fid!=fid);S.farms=S.farms.filter(f=>f.id!=fid)}
+function delC(id){farmsOf(id).map(f=>f.id).forEach(rmFarm);S.clients=S.clients.filter(c=>c.id!=id);save();go("cli")}
+function fform(p){const[cid,fid]=p.split("|"),f=fid?S.farms.find(x=>x.id==fid):null;
+ app.innerHTML=bk(f?`go('fazenda','${fid}')`:`go('cliente','${cid}')`,"Voltar")+`<h2>${f?"Editar fazenda":"Nova fazenda"}</h2><label>Nome da fazenda<input id="fn" value="${esc(f?f.name:"")}"></label><label>Município / UF<input id="fc" placeholder="Ex.: Sorriso / MT" value="${esc(f?f.city||"":"")}"></label><label>Observações<textarea id="fo" rows="3" ${TA}>${esc(f?f.note||"":"")}</textarea></label><p id="err" style="color:var(--er)"></p><button class="btn" onclick="saveF('${cid}','${fid||""}')">Salvar fazenda</button>`}
+function saveF(cid,fid){const name=$("#fn").value.trim(),city=$("#fc").value.trim(),note=$("#fo").value.trim();if(!name){$("#err").textContent="Informe o nome da fazenda.";return}
+ if(fid){const f=S.farms.find(x=>x.id==fid);f.name=name;f.city=city;f.note=note}else{fid=Date.now().toString(36);S.farms.push({id:fid,cid,name,city,note})}save();go("fazenda",fid)}
+const sfOf=fid=>S.safras.filter(q=>q.fid==fid).sort((x,y)=>(y.start||"").localeCompare(x.start||"")||y.name.localeCompare(x.name,"pt-BR",{numeric:true}));
+const per=q=>`${fmtD(q.start)||"–"} a ${fmtD(q.end)||"–"}`;
+const cvOf=(sid,tid)=>S.cultivos.find(c=>c.sid==sid&&c.tid==tid);
+const cvTxt=c=>c&&c.crop?[c.crop,c.variety].filter(Boolean).map(esc).join(" · "):"sem cultura";
+function resumo(q){const m={};S.cultivos.filter(c=>c.sid==q.id&&c.crop).forEach(c=>{const t=S.fields.find(x=>x.id==c.tid);if(!t)return;const o=m[c.crop]=m[c.crop]||{ha:0};o.ha+=+t.area||0});return Object.entries(m).sort((x,y)=>y[1].ha-x[1].ha).map(([k,o])=>`${esc(k)} ${fmHa(o.ha)}`).join(" · ")}
+function fazenda(id){const f=S.farms.find(x=>x.id==id);if(!f)return cli();const c=S.clients.find(x=>x.id==f.cid),ts=srt(fieldsOf(id),"name"),ss=sfOf(id),ls=ss[0];
+ app.innerHTML=bk(`go('cliente','${f.cid}')`,esc(c?c.name:"Cliente"))+`<h2>${esc(f.name)}</h2>`+(f.city?`<p class="mut" style="margin:0">${esc(f.city)}</p>`:"")+(f.note?`<p class="mut" style="margin:4px 0">${esc(f.note)}</p>`:"")+`<div><button class="lnk" style="padding:2px 0;font-size:14px" onclick="go('fform','${f.cid}|${id}')">Editar fazenda</button></div>
+<div class="card"><small>TOTAL DA FAZENDA</small><div style="margin-top:4px"><b>${ts.length}</b> talhão(ões) · <b>${fmHa(haSum(ts))}</b></div></div>
+<h3>Safras</h3>`+(ss.length?ss.map(q=>`<div class="card tap" onclick="go('safra','${q.id}')"><b>Safra ${esc(q.name)}</b><br><small>${per(q)}</small>${resumo(q)?`<br><small>${resumo(q)}</small>`:""}</div>`).join(""):`<p class="mut">Nenhuma safra cadastrada.</p>`)+`<button class="btn" onclick="go('sform','${id}|')">+ Nova safra</button>
+<h3>Talhões</h3>`+
+ (ts.length?ts.map(t=>`<div class="card" id="ft_${t.id}"><b>${esc(t.name)}</b>${t.area!==""&&t.area!=null?` · ${fmHa(t.area)}`:""}${ls?`<br><small>Safra ${esc(ls.name)}: ${cvTxt(cvOf(ls.id,t.id))}</small>`:""}${t.note?`<div class="mut" style="font-size:14px">${esc(t.note)}</div>`:""}<div><button class="lnk" style="padding:2px 0;font-size:14px" onclick="go('tform','${id}|${t.id}')">Editar</button> · <button class="lnk" style="color:var(--er);padding:2px 0;font-size:14px" onclick="askDelFT('${t.id}')">Excluir</button></div></div>`).join(""):`<p class="mut">Nenhum talhão cadastrado.</p>`)+
+ `<button class="btn" onclick="go('tform','${id}|')">+ Adicionar talhão</button><div id="del" style="margin-top:24px"><button class="lnk" style="color:var(--er)" onclick="askDelF('${id}')">Excluir fazenda</button></div>`}
+function askDelF(id){const n=fieldsOf(id).length,m=S.safras.filter(q=>q.fid==id).length;$("#del").innerHTML=`<div class="card" style="border-color:var(--er)">Excluir esta fazenda${n||m?` com ${[n?n+" talhão(ões)":"",m?m+" safra(s)":""].filter(Boolean).join(" e ")}`:""}? Não dá para desfazer.<div class="row" style="margin-top:8px"><button class="sm" style="background:var(--mut)" onclick="fazenda('${id}')">Cancelar</button><button class="sm" style="background:var(--er)" onclick="delF('${id}')">Excluir</button></div></div>`}
+function delF(id){const f=S.farms.find(x=>x.id==id);rmFarm(id);save();go("cliente",f.cid)}
+function askDelFT(id){const t=S.fields.find(x=>x.id==id);$("#ft_"+id).innerHTML=`<b style="color:var(--er)">Excluir este talhão?</b><br>O talhão e as culturas dele nas safras não poderão ser recuperados.<div class="row" style="margin-top:8px"><button class="sm" style="background:var(--mut)" onclick="fazenda('${t.fid}')">Cancelar</button><button class="sm" style="background:var(--er)" onclick="delFT('${id}')">Excluir talhão</button></div>`}
+function delFT(id){const t=S.fields.find(x=>x.id==id);S.fields=S.fields.filter(x=>x.id!=id);S.cultivos=S.cultivos.filter(c=>c.tid!=id);save();fazenda(t.fid)}
+let TD=null;
+function tform(p){const[fid,tid]=p.split("|"),t=tid?S.fields.find(x=>x.id==tid):null;
+ TD=t?{id:t.id,fid,name:t.name,area:t.area==null?"":t.area,note:t.note||""}:{id:"",fid,name:"",area:"",note:""};drawTF()}
+function drawTF(){const f=S.farms.find(x=>x.id==TD.fid);
+ app.innerHTML=bk(`go('fazenda','${TD.fid}')`,esc(f.name))+`<h2>${TD.id?"Editar talhão":"Novo talhão"}</h2>
+<label>Nome do talhão<input value="${esc(TD.name)}" oninput="TD.name=this.value" placeholder="Ex.: T-01"></label>
+<label>Área (ha)<input type="number" step="any" inputmode="decimal" value="${TD.area}" oninput="TD.area=this.value"></label>
+<label>Observações<textarea rows="3" ${TA} oninput="TD.note=this.value">${esc(TD.note||"")}</textarea></label><p class="mut" style="font-size:13px;margin:0">A cultura e a variedade de cada safra são informadas dentro da safra da fazenda.</p><p id="err" style="color:var(--er)"></p><button class="btn" onclick="saveTF()">Salvar talhão</button>`}
+function saveTF(){const err=s=>{$("#err").textContent=s},n=TD.name.trim();if(!n)return err("Informe o nome do talhão.");
+ const a=String(TD.area).trim().replace(",","."),ar=a===""?"":+a;if(a!==""&&(!isFinite(ar)||ar<0))return err("Informe uma área válida em hectares.");
+ const o={id:TD.id||nid(),fid:TD.fid,name:n,area:ar,note:(TD.note||"").trim()};
+ if(TD.id)S.fields[S.fields.findIndex(x=>x.id==TD.id)]=o;else S.fields.push(o);save();go("fazenda",TD.fid)}
+let _id=0;const nid=()=>Date.now().toString(36)+(_id++).toString(36);
+function sform(p){const[fid,sid]=p.split("|"),q=sid?S.safras.find(x=>x.id==sid):null,d=new Date(),y=d.getMonth()>=6?d.getFullYear():d.getFullYear()-1,def=y+"/"+String(y+1).slice(2);
+ app.innerHTML=bk(q?`go('safra','${sid}')`:`go('fazenda','${fid}')`,"Voltar")+`<h2>${q?"Editar safra":"Nova safra"}</h2><label>Nome da safra<input id="sn" value="${esc(q?q.name:def)}" placeholder="Ex.: 2026/27"></label><div class="g2"><label>Início da safra<input id="s1" type="date" value="${q?q.start:""}"></label><label>Fim da safra<input id="s2" type="date" value="${q?q.end:""}"></label></div><label>Observações<textarea id="so" rows="3" ${TA}>${esc(q?q.note||"":"")}</textarea></label><p id="err" style="color:var(--er)"></p><button class="btn" onclick="saveS('${fid}','${sid||""}')">Salvar safra</button>`}
+function saveS(fid,sid){const err=s=>{$("#err").textContent=s},name=$("#sn").value.trim(),start=$("#s1").value,end=$("#s2").value,note=$("#so").value.trim();
+ if(!name)return err("Informe o nome da safra.");if(start&&end&&end<start)return err("A data final da safra não pode ser anterior à data inicial.");
+ if(S.safras.some(x=>x.fid==fid&&x.id!=sid&&x.name.toLowerCase()==name.toLowerCase()))return err("Já existe uma safra com esse nome nesta fazenda.");
+ if(sid){const q=S.safras.find(x=>x.id==sid);Object.assign(q,{name,start,end,note})}else{sid=nid();S.safras.push({id:sid,fid,name,start,end,note})}save();go("safra",sid)}
+function safra(id){const q=S.safras.find(x=>x.id==id);if(!q)return cli();const f=S.farms.find(x=>x.id==q.fid),ts=srt(fieldsOf(q.fid),"name");
+ app.innerHTML=bk(`go('fazenda','${q.fid}')`,esc(f.name))+`<h2>Safra ${esc(q.name)}</h2><p class="mut" style="margin:0">${per(q)}</p>`+(q.note?`<p class="mut" style="margin:4px 0">${esc(q.note)}</p>`:"")+`<div><button class="lnk" style="padding:2px 0;font-size:14px" onclick="go('sform','${q.fid}|${id}')">Editar safra</button></div>
+<div class="card"><small>RESUMO DA SAFRA</small><div style="margin-top:4px">${resumo(q)||"Nenhuma cultura informada."}</div></div><h3>Culturas por talhão</h3>`+
+ (ts.length?ts.map(t=>`<div class="card"><b>${esc(t.name)}</b>${t.area!==""&&t.area!=null?` · ${fmHa(t.area)}`:""}<br><small>${cvTxt(cvOf(id,t.id))}</small></div>`).join("")+`<button class="btn" onclick="go('cult','${id}')">Editar culturas dos talhões</button>`:`<p class="mut">Cadastre os talhões da fazenda para informar as culturas desta safra.</p>`)+
+ `<div id="del" style="margin-top:24px"><button class="lnk" style="color:var(--er)" onclick="askDelS('${id}')">Excluir safra</button></div>`}
+function askDelS(id){const n=S.cultivos.filter(c=>c.sid==id).length;$("#del").innerHTML=`<div class="card" style="border-color:var(--er)">Excluir esta safra${n?` e as culturas de ${n} talhão(ões)`:""}? Não dá para desfazer.<div class="row" style="margin-top:8px"><button class="sm" style="background:var(--mut)" onclick="safra('${id}')">Cancelar</button><button class="sm" style="background:var(--er)" onclick="delS('${id}')">Excluir</button></div></div>`}
+function delS(id){const q=S.safras.find(x=>x.id==id);S.cultivos=S.cultivos.filter(c=>c.sid!=id);S.safras=S.safras.filter(x=>x.id!=id);save();go("fazenda",q.fid)}
+let CD=null;
+function cult(sid){const q=S.safras.find(x=>x.id==sid);CD={sid,r:{}};fieldsOf(q.fid).forEach(t=>{const c=cvOf(sid,t.id);CD.r[t.id]={crop:c?c.crop:"",variety:c?c.variety:""}});drawCD()}
+function drawCD(){const q=S.safras.find(x=>x.id==CD.sid),ts=srt(fieldsOf(q.fid),"name"),y=window.scrollY;Object.values(CD.r).forEach(r=>{if(r.crop&&!S.crops.includes(r.crop))S.crops.push(r.crop)});
+ app.innerHTML=bk(`go('safra','${CD.sid}')`,`Safra ${esc(q.name)}`)+`<h2>Culturas dos talhões</h2><p class="mut" style="margin:0 0 8px">Safra ${esc(q.name)} · ${per(q)}</p><div class="row"><input id="nc" placeholder="Nova cultura"><button class="sm" onclick="addCrop()">+ Cultura</button></div>`+
+ ts.map(t=>`<div class="card" style="margin-top:10px"><b>${esc(t.name)}</b>${t.area!==""&&t.area!=null?` · ${fmHa(t.area)}`:""}<label>Cultura<select onchange="CD.r['${t.id}'].crop=this.value"><option value="">Sem cultura</option>${S.crops.map(c=>`<option ${c==CD.r[t.id].crop?"selected":""}>${esc(c)}</option>`).join("")}</select></label><label>Variedade<input value="${esc(CD.r[t.id].variety)}" oninput="CD.r['${t.id}'].variety=this.value"></label></div>`).join("")+`<p id="err" style="color:var(--er)"></p><button class="btn" onclick="saveCD()">Salvar culturas</button>`;window.scrollTo(0,y)}
+function addCrop(){const v=$("#nc").value.trim();if(v&&!S.crops.includes(v)){S.crops.push(v);save()}drawCD()}
+function saveCD(){const q=S.safras.find(x=>x.id==CD.sid),ts=fieldsOf(q.fid);
+ for(const t of ts){const r=CD.r[t.id];if(r.variety.trim()&&!r.crop){$("#err").textContent=`Talhão ${t.name}: informe a cultura ou apague a variedade.`;return}}
+ S.cultivos=S.cultivos.filter(c=>c.sid!=CD.sid);ts.forEach(t=>{const r=CD.r[t.id];if(r.crop)S.cultivos.push({id:CD.sid+"-"+t.id,sid:CD.sid,tid:t.id,crop:r.crop,variety:r.variety.trim()})});save();go("safra",CD.sid)}
+function migFields(){let ch=false;S.farms.forEach(f=>{const fs=S.fields.filter(t=>t.fid==f.id&&(t.crop||t.variety||t.start||t.end));if(!fs.length)return;const g={};fs.forEach(t=>{const k=(t.start||"")+"|"+(t.end||"");(g[k]=g[k]||[]).push(t)});
+  Object.keys(g).forEach(k=>{const[a,b]=k.split("|");let q=S.safras.find(x=>x.fid==f.id&&(x.start||"")==a&&(x.end||"")==b);
+   if(!q){const y1=a.slice(0,4),y2=b.slice(0,4);let nm=y1&&y2?(y1==y2?y1:y1+"/"+y2.slice(2)):(y1||y2||"Safra importada");const base=nm;let i=2;while(S.safras.some(x=>x.fid==f.id&&x.name==nm))nm=base+" ("+i++ +")";q={id:nid(),fid:f.id,name:nm,start:a,end:b,note:""};S.safras.push(q)}
+   g[k].forEach(t=>{if((t.crop||t.variety)&&!cvOf(q.id,t.id))S.cultivos.push({id:q.id+"-"+t.id,sid:q.id,tid:t.id,crop:t.crop||"",variety:t.variety||""})})});
+  });S.fields.forEach(t=>{["crop","variety","start","end"].forEach(k=>{if(k in t){delete t[k];ch=true}})});if(ch)save()}
+const TA='style="width:100%;box-sizing:border-box;font-size:16px;padding:10px;margin:8px 0;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)"';
+function backup(){const n=[S.machines.length,S.tests.length,(S.points||[]).length,S.clients.length,S.farms.length,S.fields.length,S.safras.length];
+ app.innerHTML=`<button class="lnk" onclick="go('home')">‹ Início</button><h2>Backup dos dados</h2>
+<div class="card"><b>Exportar</b><p class="mut" style="margin:4px 0 8px">Guarda ${n[0]} equipamento(s), ${n[1]} teste(s), ${n[2]} ponto(s), ${n[3]} cliente(s), ${n[4]} fazenda(s), ${n[5]} talhão(ões) e ${n[6]} safra(s) em um arquivo.</p><button class="btn" onclick="bExp()">Salvar arquivo de backup</button><button class="btn" style="background:var(--mut)" onclick="bCopy()">Copiar backup como texto</button><p id="bm" class="mut"></p></div>
+<div class="card"><b>Importar</b><p class="mut" style="margin:4px 0 8px">Junta o backup aos dados deste aparelho. O que já existe não é duplicado.</p><input type="file" accept=".json,application/json" onchange="bFile(this)"><textarea id="bt" rows="4" placeholder="Ou cole aqui o texto do backup" ${TA}></textarea><button class="btn" onclick="bImp($('#bt').value)">Importar</button><div id="bm2"></div></div>`}
+const bJson=()=>JSON.stringify({app:"campo",versao:1,data:S});
+async function bExp(){const d=new Date(),r=await dl(`backup-campo-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}.json`,bJson());$("#bm").textContent=r=="ok"?"Arquivo gerado.":r=="declined"?"Cancelado.":"Não foi possível salvar. Use \"Copiar backup como texto\"."}
+async function bCopy(){try{await navigator.clipboard.writeText(bJson());$("#bm").textContent="Texto copiado. Cole em um lugar seguro (nota, e-mail para você)."}catch(e){$("#bt").value=bJson();$("#bm").textContent="Não deu para copiar sozinho: o texto está na caixa de importação, copie de lá."}}
+function bFile(i){const f=i.files&&i.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{$("#bt").value=r.result;bImp(r.result)};r.readAsText(f)}
+let bPend=null;
+function bImp(txt){let o;const out=s=>{$("#bm2").textContent=s};try{o=JSON.parse(txt)}catch(e){return out("Texto ou arquivo inválido.")}
+ const d=o&&o.data||o;if(!d||!Array.isArray(d.machines))return out("Backup não reconhecido.");
+ const ids=new Set(S.points.map(x=>x.id)),np=(d.points||[]).filter(x=>x&&!ids.has(x.id)).length;
+ if(!np){bPend=null;return bDo(d,null)}
+ bPend=d;$("#bm2").innerHTML=`<div class="card" style="border:2px solid var(--ac);margin-top:10px"><b>${np} ponto(s) novo(s) neste backup</b><p class="mut" style="margin:4px 0 0">Em qual grupo colocar esses pontos? Escolha um grupo existente ou crie um novo.</p>${grpPicker("bgs","bgn")}<p id="bgm" style="color:var(--er);margin:6px 0 0"></p><div class="row" style="margin-top:8px"><button class="sm" style="background:var(--mut)" onclick="bPend=null;$('#bm2').textContent='Importação cancelada.'">Cancelar</button><button class="sm" onclick="bOk()">Confirmar importação</button></div></div>`}
+function bOk(){if(!bPend)return;const gid=grpResolve("bgs","bgn");if(!gid){$("#bgm").textContent="Informe o nome do novo grupo.";return}const d=bPend;bPend=null;bDo(d,gid)}
+function bDo(d,gid){const add=k=>{S[k]=S[k]||[];const ids=new Set(S[k].map(x=>x.id));let n=0;(d[k]||[]).forEach(x=>{if(x&&!ids.has(x.id)){S[k].push(x);n++}});return n};
+ const a=add("machines"),b=add("tests"),cl=add("clients"),fa=add("farms"),ta=add("fields"),sa=add("safras"),cu=add("cultivos");let c=0;
+ if(gid){const ids=new Set(S.points.map(x=>x.id));(d.points||[]).forEach(x=>{if(x&&!ids.has(x.id)){S.points.push({...x,gid});ids.add(x.id);c++}})}
+ ["brands","products","crops"].forEach(k=>(d[k]||[]).forEach(x=>{if(!S[k].includes(x))S[k].push(x)}));migFields();save();$("#bm2").textContent=`Importado: ${a} equipamento(s), ${b} teste(s), ${c} ponto(s), ${cl} cliente(s), ${fa} fazenda(s), ${ta} talhão(ões), ${sa} safra(s).`}
+const mLS=()=>{try{return JSON.parse(localStorage.getItem("campo_map"))||{}}catch(e){return{}}};
+let gmode=mLS().mode||"radar",MV=null,mtl=new Map(),mraf=0,mfollow=true,gpick=false,pk=null,gtl=0,ms=null,msWait=false;
+const IC={
+ ruler:`<svg viewBox="0 0 24 24"><g transform="rotate(-45 12 12)"><rect x="1" y="8" width="22" height="8" rx="1.5"/><path d="M5 8v3M9 8v4.500M13 8v3M17 8v4.500"/></g></svg>`,
+ poly:`<svg viewBox="0 0 24 24"><path d="M4 18l6-9 5 6 5-9"/><circle cx="4" cy="18" r="1.600"/><circle cx="10" cy="9" r="1.600"/><circle cx="15" cy="15" r="1.600"/><circle cx="20" cy="6" r="1.600"/></svg>`,
+ layers:`<svg viewBox="0 0 24 24"><path d="M12 2 2 7l10 5 10-5z"/><path d="M2 12l10 5 10-5"/><path d="M2 17l10 5 10-5"/></svg>`,
+ radar:`<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12l6.5-6.5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>`,
+ sat:`<svg viewBox="0 0 24 24"><g transform="rotate(-45 12 12)"><rect x="9.5" y="9" width="5" height="6" rx="1"/><path d="M9.5 12H7M14.5 12H17"/><rect x="2" y="9.5" width="5" height="5" rx=".8"/><rect x="17" y="9.5" width="5" height="5" rx=".8"/></g><path d="M13.5 21a7.5 7.5 0 0 0 7.500-7.500M13.500 17.500a3.500 3.500 0 0 0 3.500-3.500"/></svg>`,
+ map:`<svg viewBox="0 0 24 24"><path d="M3 6l6-2.5 6 2.5 6-2.5v14.5l-6 2.5-6-2.5-6 2.5z"/><path d="M9 3.5V18M15 6v14.500"/></svg>`,
+ loc:`<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5"/><circle cx="12" cy="12" r="8"/><path d="M12 1.500v3M12 19.500v3M1.500 12h3M19.500 12h3"/></svg>`,
+ pin:`<svg viewBox="0 0 24 24"><path d="M12 21s-7-6.200-7-11a7 7 0 0 1 14 0c0 4.800-7 11-7 11z"/><circle cx="12" cy="10" r="2.500"/></svg>`};
+const mW=z=>256*2**z,mFx=lo=>(lo+180)/360,mFy=la=>{const s=Math.sin(la*Math.PI/180);return .5-Math.log((1+s)/(1-s))/(4*Math.PI)},mLon=fx=>fx*360-180,mLat=fy=>180/Math.PI*Math.atan(Math.sinh(Math.PI*(1-2*fy)));
+const mCenterOn=(la,lo)=>{MV.fx=mFx(lo);MV.fy=mFy(la)};
+function mSched(){if(mraf)return;mraf=requestAnimationFrame(()=>{mraf=0;mRender()})}
+function mCenter(){if(!gp){toast("Ainda sem posição do GPS. Toque em Iniciar coleta.");return}mfollow=true;if(MV.z<16)MV.z=17;mCenterOn(gp.coords.latitude,gp.coords.longitude);mSched()}
+function mLay(){const l=$("#mlay"),on=l&&!l.classList.contains("on");closeLay();if(on)l.classList.add("on")}
+function closeLay(){document.querySelectorAll(".mpop").forEach(x=>x.classList.remove("on"))}
+function gMode(m,init){gmode=m;if(!init)try{localStorage.setItem("campo_map",JSON.stringify({mode:m}))}catch(e){}
+ mtl.forEach(t=>t.img.remove());mtl=new Map();gtl=0;
+ document.querySelectorAll("#mlay .mlb").forEach(b=>b.classList.toggle("on",b.dataset.m==m));
+ const a=$("#mattr");if(a){a.textContent=m=="sat"?"© Esri":m=="rua"?"© OpenStreetMap":"";a.style.display=m=="radar"?"none":"block"}
+ closeLay();
+ if(m!="radar")setTimeout(()=>{const x=$("#mattr");if(x&&gmode==m&&!gtl&&$("#mapv"))x.textContent="As imagens do mapa não carregaram: sem internet ou bloqueadas nesta página."},4000);
+ mSched()}
+function mRender(){const el=$("#mapv");if(!el||!MV)return;const W=el.clientWidth,H=el.clientHeight;if(!W||!H)return;
+ MV.z=Math.min(19,Math.max(3,MV.z));MV.fx=Math.min(1,Math.max(0,MV.fx));MV.fy=Math.min(1,Math.max(0,MV.fy));
+ const wd=mW(MV.z),sx=f=>W/2+(f-MV.fx)*wd,sy=f=>H/2+(f-MV.fy)*wd;
+ if(gmode!=="radar"){const zt=Math.min(19,Math.max(1,Math.round(MV.z))),n=2**zt,sc=2**(MV.z-zt),cx=MV.fx*n*256,cy=MV.fy*n*256,hw=W/2/sc,hh=H/2/sc,lay=$("#mtiles"),need=new Set();let allOk=true;
+  for(let tx=Math.floor((cx-hw)/256);tx<=Math.floor((cx+hw)/256);tx++)for(let ty=Math.floor((cy-hh)/256);ty<=Math.floor((cy+hh)/256);ty++){
+   if(ty<0||ty>=n)continue;const k=gmode+"/"+zt+"/"+tx+"/"+ty;need.add(k);let t=mtl.get(k);
+   if(!t){const xx=((tx%n)+n)%n,img=new Image();img.alt="";img.draggable=false;
+    img.src=gmode=="sat"?`https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${zt}/${ty}/${xx}`:`https://tile.openstreetmap.org/${zt}/${xx}/${ty}.png`;
+    img.style.cssText="position:absolute;max-width:none;pointer-events:none;-webkit-user-drag:none;z-index:"+zt;img.onload=()=>{gtl++;mSched()};lay.appendChild(img);t={img,zt,tx,ty};mtl.set(k,t)}
+   if(!(t.img.complete&&t.img.naturalWidth))allOk=false}
+  mtl.forEach((t,k)=>{const nn=2**t.zt,s2=2**(MV.z-t.zt),l=W/2+(t.tx*256-MV.fx*nn*256)*s2,tp=H/2+(t.ty*256-MV.fy*nn*256)*s2,sz=256*s2;
+   if(l>W+300||tp>H+300||l+sz<-300||tp+sz<-300||(allOk&&t.zt!==zt)||(mtl.size>160&&!need.has(k))){t.img.remove();mtl.delete(k);return}
+   t.img.style.left=l.toFixed(1)+"px";t.img.style.top=tp.toFixed(1)+"px";t.img.style.width=(sz+.6).toFixed(1)+"px";t.img.style.height=(sz+.6).toFixed(1)+"px"})}
+ const mm=$("#mmark");let h="";
+ if(gp){const c=gp.coords,x=sx(mFx(c.longitude)),y=sy(mFy(c.latitude)),mp=156543.03392*Math.cos(c.latitude*Math.PI/180)/2**MV.z;
+  if(gmode==="radar")[10,20,50,100,200,500,1000,2000,5000].forEach(d=>{const r=d/mp;if(r<22||r>Math.max(W,H)*1.5)return;h+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" fill="none" stroke="#64748b" stroke-opacity=".75" stroke-dasharray="4 4"/><text x="${(x+4).toFixed(1)}" y="${(y-r-3).toFixed(1)}" font-size="10" fill="#cbd5e1">${d>=1000?d/1000+" km":d+" m"}</text>`});
+  const ar=Math.min(c.accuracy/mp,3000);h+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${ar.toFixed(1)}" fill="#3b82f6" fill-opacity=".18"/>`}
+ S.points.forEach((p,i)=>{const x=sx(mFx(p.lon)),y=sy(mFy(p.lat));if(x<-20||x>W+20||y<-20||y>H+20)return;h+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="9" fill="#16a34a" stroke="#fff" stroke-width="2"/><text x="${x.toFixed(1)}" y="${y.toFixed(1)}" font-size="10" font-weight="700" fill="#fff" text-anchor="middle" dy=".35em">${i+1}</text>`});
+ h+=msSvg(sx,sy);
+ if(gp){const c=gp.coords;h+=`<circle cx="${sx(mFx(c.longitude)).toFixed(1)}" cy="${sy(mFy(c.latitude)).toFixed(1)}" r="8" fill="#3b82f6" stroke="#fff" stroke-width="2.5"/>`}
+ if(pk)h+=`<circle cx="${sx(mFx(pk.lon)).toFixed(1)}" cy="${sy(mFy(pk.lat)).toFixed(1)}" r="11" fill="#f97316" stroke="#fff" stroke-width="3"/><circle cx="${sx(mFx(pk.lon)).toFixed(1)}" cy="${sy(mFy(pk.lat)).toFixed(1)}" r="3" fill="#fff"/>`;
+ if(gmode==="radar")h+=`<path d="M33 66l-6 14h12z" fill="#94a3b8"/><text x="33" y="62" font-size="10" text-anchor="middle" fill="#94a3b8">N</text>`;
+ mm.setAttribute("viewBox",`0 0 ${W} ${H}`);mm.innerHTML=h}
+function mInit(){const el=$("#mapv");if(!el)return;const P=new Map();let g=null,tap=null;
+ const rel=e=>{const r=el.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}};
+ const mid=()=>{const q=[...P.values()];return q.length>1?{x:(q[0].x+q[1].x)/2,y:(q[0].y+q[1].y)/2}:q[0]};
+ const dist=()=>{const q=[...P.values()];return q.length>1?Math.hypot(q[0].x-q[1].x,q[0].y-q[1].y):0};
+ const anchor=()=>{if(!P.size){g=null;return}const m=mid(),wd=mW(MV.z);g={d:dist(),z:MV.z,afx:MV.fx+(m.x-el.clientWidth/2)/wd,afy:MV.fy+(m.y-el.clientHeight/2)/wd}};
+ el.onpointerdown=e=>{try{el.setPointerCapture(e.pointerId)}catch(x){}P.set(e.pointerId,rel(e));if(P.size==1)tap={x:e.clientX,y:e.clientY,t:Date.now(),moved:false};else if(tap)tap.moved=true;anchor();closeLay()};
+ el.onpointermove=e=>{if(!P.has(e.pointerId)||!g)return;P.set(e.pointerId,rel(e));if(tap&&Math.hypot(e.clientX-tap.x,e.clientY-tap.y)>10)tap.moved=true;
+  if(!(tap&&tap.moved))return;mfollow=false;const m=mid();let z=g.z;if(P.size>1&&g.d>0)z=Math.min(19,Math.max(3,g.z+Math.log2(dist()/g.d)));
+  const wd=mW(z);MV.z=z;MV.fx=g.afx-(m.x-el.clientWidth/2)/wd;MV.fy=g.afy-(m.y-el.clientHeight/2)/wd;mSched()};
+ const up=e=>{if(!P.has(e.pointerId))return;const r=rel(e);P.delete(e.pointerId);
+  if(e.type=="pointerup"&&tap&&!tap.moved&&P.size==0&&Date.now()-tap.t<700&&(gpick||ms))gpick?mPick(r.x,r.y):msTap(r.x,r.y);
+  if(P.size==0)tap=null;anchor()};
+ el.onpointerup=up;el.onpointercancel=up;
+ el.onwheel=e=>{e.preventDefault();const r=rel(e),wd=mW(MV.z),afx=MV.fx+(r.x-el.clientWidth/2)/wd,afy=MV.fy+(r.y-el.clientHeight/2)/wd;MV.z=Math.min(19,Math.max(3,MV.z-e.deltaY/300));const w2=mW(MV.z);MV.fx=afx-(r.x-el.clientWidth/2)/w2;MV.fy=afy-(r.y-el.clientHeight/2)/w2;mfollow=false;closeLay();mSched()}}
+function pkStart(){if(ms){ms=null;msWait=false;msUI()}gpick=true;pk=null;closeLay();pkUI();mSched()}
+function pkCancel(){gpick=false;pk=null;pkUI();mSched()}
+function mPick(x,y){const el=$("#mapv"),wd=mW(MV.z);pk={lat:mLat(MV.fy+(y-el.clientHeight/2)/wd),lon:mLon(MV.fx+(x-el.clientWidth/2)/wd)};pkUI();mSched()}
+function pkOk(){if(!pk)return;coll={lat:pk.lat,lon:pk.lon,acc:null,alt:null,altAcc:null,ts:Date.now(),man:true};gpick=false;pk=null;pkUI();gForm();mSched()}
+function pkUI(){const d=$("#mdock"),b=$("#mban"),s=$("#gpk");if(!d||!b||!s)return;dockVis();
+ b.style.display=gpick&&!pk?"block":"none";if(gpick&&!pk)b.innerHTML=`Toque no mapa no lugar do ponto <button class="lnk" style="padding:0 0 0 8px;font-size:14px" onclick="pkCancel()">Cancelar</button>`;
+ if(gpick&&pk){s.style.display="block";s.innerHTML=`<b>Ponto marcado no mapa</b><p style="margin:6px 0">Latitude: <b>${gF(pk.lat,7)}</b><br>Longitude: <b>${gF(pk.lon,7)}</b><br><small class="mut">Toque em outro lugar do mapa para mover a marca.</small></p><div class="row"><button class="sm" style="background:var(--mut)" onclick="pkCancel()">Cancelar</button><button class="sm" onclick="pkOk()">Gravar este ponto</button></div>`}else{s.style.display="none";s.innerHTML=""}}
+function geoDist(la1,lo1,la2,lo2){const a=6378137,f=1/298.257223563,b=a*(1-f),r=Math.PI/180,L=(lo2-lo1)*r,U1=Math.atan((1-f)*Math.tan(la1*r)),U2=Math.atan((1-f)*Math.tan(la2*r)),sU1=Math.sin(U1),cU1=Math.cos(U1),sU2=Math.sin(U2),cU2=Math.cos(U2);
+ let lam=L,it=0,sS,cS,sg,c2a,c2s,sig,lp;
+ do{const sl=Math.sin(lam),cl=Math.cos(lam);sS=Math.hypot(cU2*sl,cU1*sU2-sU1*cU2*cl);if(sS===0)return 0;cS=sU1*sU2+cU1*cU2*cl;sig=Math.atan2(sS,cS);sg=cU1*cU2*sl/sS;c2a=1-sg*sg;c2s=c2a?cS-2*sU1*sU2/c2a:0;const C=f/16*c2a*(4+f*(4-3*c2a));lp=lam;lam=L+(1-C)*f*sg*(sig+C*sS*(c2s+C*cS*(-1+2*c2s*c2s)))}while(Math.abs(lam-lp)>1e-12&&++it<100);
+ const u2=c2a*(a*a-b*b)/(b*b),A=1+u2/16384*(4096+u2*(-768+u2*(320-175*u2))),B=u2/1024*(256+u2*(-128+u2*(74-47*u2))),ds=B*sS*(c2s+B/4*(cS*(-1+2*c2s*c2s)-B/6*c2s*(-3+4*sS*sS)*(-3+4*c2s*c2s)));return b*A*(sig-ds)}
+function geoArea(p){const r=Math.PI/180,a=6378137,e2=.00669437999014,la0=p.reduce((s,q)=>s+q.lat,0)/p.length,lo0=p.reduce((s,q)=>s+q.lon,0)/p.length,sn=Math.sin(la0*r),w=1-e2*sn*sn,Mr=a*(1-e2)/w**1.5,Nr=a/Math.sqrt(w),c=Math.cos(la0*r),xy=p.map(q=>[(q.lon-lo0)*r*Nr*c,(q.lat-la0)*r*Mr]);let s=0;xy.forEach((q,i)=>{const u=xy[(i+1)%xy.length];s+=q[0]*u[1]-u[0]*q[1]});return Math.abs(s)/2}
+const fmN=(v,d)=>v.toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d}),fmM=v=>fmN(v,1)+" m";
+function msCalc(){const p=ms.pts,n=p.length,seg=[];for(let i=0;i<n-1;i++)seg.push(geoDist(p[i].lat,p[i].lon,p[i+1].lat,p[i+1].lon));
+ const cl=ms.closed&&n>=3;if(cl)seg.push(geoDist(p[n-1].lat,p[n-1].lon,p[0].lat,p[0].lon));return{seg,tot:seg.reduce((a,b)=>a+b,0),area:cl?geoArea(p):null}}
+function dockVis(){const d=$("#mdock");if(d)d.style.display=(gpick||ms)?"none":"flex"}
+function mRul(){const l=$("#mrul"),on=l&&!l.classList.contains("on");closeLay();if(on)l.classList.add("on")}
+function msStart(){if(ms){closeLay();return}if(gpick){gpick=false;pk=null;pkUI()}closeLay();ms={pts:[],closed:false};msUI();mSched()}
+function msExit(){ms=null;msWait=false;msUI();mSched()}
+function msClear(){if(!ms)return;ms.pts=[];ms.closed=false;msWait=false;msUI();mSched()}
+function msUndo(){if(!ms)return;if(ms.closed)ms.closed=false;else ms.pts.pop();msUI();mSched()}
+function msTap(x,y){const el=$("#mapv"),W=el.clientWidth,H=el.clientHeight,wd=mW(MV.z);
+ if(ms.closed){toast("Polígono fechado. Use Desfazer ou Limpar para continuar.");return}
+ if(ms.pts.length>=3){const f=ms.pts[0];if(Math.hypot(x-(W/2+(mFx(f.lon)-MV.fx)*wd),y-(H/2+(mFy(f.lat)-MV.fy)*wd))<=24){ms.closed=true;msUI();mSched();return}}
+ ms.pts.push({lat:mLat(MV.fy+(y-H/2)/wd),lon:mLon(MV.fx+(x-W/2)/wd)});msUI();mSched()}
+function msAddPos(){if(!ms||!gp)return;if(ms.closed){toast("Polígono fechado. Use Desfazer ou Limpar para continuar.");return}const c=gp.coords;ms.pts.push({lat:c.latitude,lon:c.longitude,gps:true});msUI();mSched();toast(`Posição adicionada (± ${gF(c.accuracy,1)} m).`)}
+function msGps(){if(!ms)return;if(gp){msAddPos();return}msWait=true;if(!gon){gStart();toast("Ligando o GPS. A posição será adicionada quando houver sinal.")}else toast("Aguardando o sinal do GPS.")}
+function msUI(){const m=$("#mmeas"),b=$("#mrb");if(!m)return;dockVis();
+ if(!ms){m.style.display="none";m.innerHTML="";if(b)b.classList.remove("on");return}
+ if(b)b.classList.add("on");const c=msCalc(),n=ms.pts.length,cl=ms.closed&&n>=3;let info;
+ if(!n)info="Toque no mapa para adicionar o primeiro ponto.";
+ else if(n==1)info="1 ponto marcado. Toque no mapa para continuar.";
+ else if(cl)info=`Perímetro: <b>${fmM(c.tot)}</b><br>Área: <b>${fmN(c.area,1)} m²</b> · <b>${fmN(c.area/1e4,4)} ha</b>`;
+ else info=`Comprimento total: <b>${fmM(c.tot)}</b> · ${n} pontos`+(n>=3?`<br><small class="mut">Para fechar o polígono, toque no primeiro ponto.</small>`:"");
+ m.style.display="block";m.innerHTML=`<small>MEDIÇÃO PONTO A PONTO</small><p style="margin:4px 0 0">${info}</p><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><button class="sm" onclick="msGps()">+ Minha posição</button><button class="sm" style="background:var(--mut)" onclick="msUndo()">Desfazer</button><button class="sm" style="background:var(--mut)" onclick="msClear()">Limpar</button><button class="sm" style="background:var(--er)" onclick="msExit()">Sair</button></div>`}
+function msSvg(sx,sy){if(!ms||!ms.pts.length)return"";const q=ms.pts.map(p=>[sx(mFx(p.lon)),sy(mFy(p.lat))]),n=q.length,cl=ms.closed&&n>=3,c=msCalc(),f=v=>v.toFixed(1),d=q.map((v,i)=>(i?"L":"M")+f(v[0])+" "+f(v[1])).join("")+(cl?"Z":"");let h="";
+ if(cl)h+=`<path d="${d}" fill="#fbbf24" fill-opacity=".2"/>`;
+ if(n>1)h+=`<path d="${d}" fill="none" stroke="#000" stroke-opacity=".55" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/><path d="${d}" fill="none" stroke="#fbbf24" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>`;
+ c.seg.forEach((v,i)=>{const a=q[i],b=q[(i+1)%n];if(Math.hypot(b[0]-a[0],b[1]-a[1])<30)return;const tx=fmM(v),w=tx.length*6.3+12,mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2;h+=`<rect x="${f(mx-w/2)}" y="${f(my-9)}" width="${f(w)}" height="18" rx="6" fill="#0f172a" fill-opacity=".88" stroke="#fbbf24"/><text x="${f(mx)}" y="${f(my)}" font-size="11" font-weight="600" fill="#fff" text-anchor="middle" dy=".35em">${tx}</text>`});
+ q.forEach((v,i)=>{if(i==0&&n>=3&&!cl)h+=`<circle cx="${f(v[0])}" cy="${f(v[1])}" r="12" fill="#fbbf24" fill-opacity=".25" stroke="#fbbf24" stroke-width="2"/>`;h+=`<circle cx="${f(v[0])}" cy="${f(v[1])}" r="5.5" fill="#fff" stroke="${ms.pts[i].gps?"#3b82f6":"#b45309"}" stroke-width="2.5"/>`});return h}
+window.addEventListener("resize",()=>mSched());
+let gsel=new Set(),curG=null,lastG=null;
+const pName=(p,i)=>p.name||"Ponto "+(i+1);
+const gPts=()=>S.points.map((p,i)=>({p,i})).filter(x=>x.p.gid==curG);
+function gSet(){const all=gPts(),sel=all.filter(x=>gsel.has(x.p.id));return(sel.length?sel:all).map(x=>({...x.p,name:pName(x.p,x.i)}))}
+const gCnt=()=>gsel.size?gsel.size+" ponto(s) selecionado(s)":"Nenhum selecionado: a exportação usa todos os pontos do grupo";
+function gTog(id,on){on?gsel.add(id):gsel.delete(id);const e=$("#gcnt");if(e)e.textContent=gCnt()}
+function gAll(on){gsel=new Set(on?gPts().map(x=>x.p.id):[]);gList()}
+const pBar=t=>`<div style="display:flex;align-items:center;gap:10px;margin:6px 0 12px"><button class="sm" style="padding:10px 16px;font-size:20px;line-height:1" onclick="pMenu()" aria-label="Menu">☰</button><h2 style="margin:0">${t}</h2></div>`;
+function pMenu(){if(document.getElementById("pm"))return;const d=document.createElement("div");d.id="pm";d.style.cssText="position:fixed;left:0;top:0;right:0;bottom:0;z-index:50;background:rgba(0,0,0,.55)";d.onclick=e=>{if(e.target===d)d.remove()};
+ d.innerHTML=`<div style="width:78%;max-width:300px;height:100%;box-sizing:border-box;overflow:auto;background:var(--card);color:var(--ink);border-right:1px solid var(--line);padding:calc(18px + env(safe-area-inset-top,0px)) 16px 16px"><b style="color:var(--ac);font-size:18px;display:block;margin-bottom:8px">Coleta de pontos</b><button class="mi" onclick="go('pontos')">📍 Coletar pontos</button><button class="mi" onclick="go('plista')">🗂 Pontos coletados</button><button class="mi" onclick="go('home')">‹ Início</button></div>`;document.body.appendChild(d)}
+const grpPicker=(sid,nid,sel)=>{const gs=S.groups,v=sel&&gs.some(g=>g.id==sel)?sel:(gs[0]?gs[0].id:"__new");return`<label>Grupo<select id="${sid}" onchange="grpSel('${sid}','${nid}')">${gs.map(g=>`<option value="${g.id}" ${g.id==v?"selected":""}>${esc(g.name)}</option>`).join("")}<option value="__new" ${v=="__new"?"selected":""}>+ Novo grupo…</option></select></label><input id="${nid}" placeholder="Nome do novo grupo" style="display:${v=="__new"?"block":"none"}">`};
+const grpSel=(s,n)=>{$("#"+n).style.display=$("#"+s).value=="__new"?"block":"none"};
+function grpResolve(sid,nid){const v=$("#"+sid).value;if(v!="__new")return v;const nm=$("#"+nid).value.trim();if(!nm)return null;let g=S.groups.find(x=>x.name.toLowerCase()==nm.toLowerCase());if(!g){g={id:Date.now().toString(36),name:nm};S.groups.push(g)}return g.id}
+function plista(){app.innerHTML=pBar("Pontos coletados")+(S.groups.length?S.groups.map(g=>`<div class="card tap" onclick="go('pgrupo','${g.id}')"><b>${esc(g.name)}</b><br><small>${S.points.filter(p=>p.gid==g.id).length} ponto(s)</small></div>`).join(""):`<p class="mut">Nenhum grupo criado. Crie um grupo para organizar os pontos por assunto (por exemplo: estudo de cerca, estudo de divisa).</p>`)+`<div class="card"><b>Novo grupo</b><div class="row"><input id="ngn" placeholder="Nome do grupo"><button class="sm" onclick="gNew()">+ Grupo</button></div><p id="ngm" style="color:var(--er);margin:6px 0 0"></p></div>`}
+function gNew(){const v=$("#ngn").value.trim();if(!v){$("#ngm").textContent="Informe o nome do grupo.";return}if(S.groups.some(g=>g.name.toLowerCase()==v.toLowerCase())){$("#ngm").textContent="Já existe um grupo com esse nome.";return}S.groups.push({id:Date.now().toString(36),name:v});save();plista()}
+function pgrupo(id){if(!S.groups.some(g=>g.id==id))return plista();curG=id;gsel=new Set();
+ app.innerHTML=pBar("Pontos coletados")+`<button class="lnk" onclick="go('plista')">‹ Todos os grupos</button><div class="card" id="gh"></div><div id="glist"></div>`;gHead();gList()}
+function gHead(){const g=S.groups.find(x=>x.id==curG);$("#gh").innerHTML=`<small>GRUPO</small><br><b style="font-size:18px">${esc(g.name)}</b><br><button class="lnk" style="padding:2px 0;font-size:14px" onclick="gRen()">Renomear</button> · <button class="lnk" style="color:var(--er);padding:2px 0;font-size:14px" onclick="gDelAsk()">Excluir grupo</button>`}
+function gRen(){const g=S.groups.find(x=>x.id==curG);$("#gh").innerHTML=`<label>Nome do grupo<input id="grn" value="${esc(g.name)}"></label><p id="grm" style="color:var(--er);margin:0"></p><div class="row" style="margin-top:8px"><button class="sm" style="background:var(--mut)" onclick="gHead()">Cancelar</button><button class="sm" onclick="gRenSave()">Salvar</button></div>`}
+function gRenSave(){const v=$("#grn").value.trim();if(!v){$("#grm").textContent="Informe o nome do grupo.";return}if(S.groups.some(x=>x.id!=curG&&x.name.toLowerCase()==v.toLowerCase())){$("#grm").textContent="Já existe um grupo com esse nome.";return}S.groups.find(x=>x.id==curG).name=v;save();gHead()}
+function gDelAsk(){const n=S.points.filter(p=>p.gid==curG).length;$("#gh").innerHTML=`<b style="color:var(--er)">Excluir este grupo?</b><br>${n?`Os ${n} ponto(s) do grupo também serão excluídos e não poderão ser recuperados.`:"O grupo está vazio."}<div class="row" style="margin-top:8px"><button class="sm" style="background:var(--mut)" onclick="gHead()">Cancelar</button><button class="sm" style="background:var(--er)" onclick="gDel()">Excluir grupo</button></div>`}
+function gDel(){S.points=S.points.filter(p=>p.gid!=curG);S.groups=S.groups.filter(g=>g.id!=curG);gsel=new Set();save();go("plista")}
+function gList(){const el=$("#glist");if(!el)return;const pts=gPts();
+ el.innerHTML=`<div class="card"><b>Pontos do grupo (${pts.length})</b>`+(pts.length?`<div id="gcnt" class="mut" style="margin:6px 0">${gCnt()}</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"><button class="sm" style="background:var(--mut)" onclick="gAll(1)">Selecionar todos</button><button class="sm" style="background:var(--mut)" onclick="gAll(0)">Limpar seleção</button></div><div class="mut" style="font-size:13px">Exportar:</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px"><button class="sm" onclick="gExp('csv')">CSV</button><button class="sm" onclick="gExp('kml')">KML</button><button class="sm" onclick="gExp('shp')">SHP</button><button class="sm" onclick="gExp('lcsv')">Lista CSV</button><button class="sm" onclick="gExp('lpdf')">Lista PDF</button></div><p id="gexm" class="mut" style="margin:6px 0 0"></p>`:"")+
+ pts.map(({p,i})=>`<div id="p_${p.id}" style="border-top:1px solid var(--line);margin-top:8px;padding-top:8px"><label class="chk" style="margin:0"><input type="checkbox" ${gsel.has(p.id)?"checked":""} onchange="gTog('${p.id}',this.checked)"> <b>${esc(pName(p,i))}</b></label><small style="display:block">${new Date(p.ts).toLocaleString("pt-BR")}<br>${gF(p.lat,7)}, ${gF(p.lon,7)} · WGS84${p.acc==null?" · marcado no mapa":" · ± "+gF(p.acc,1)+" m"}${p.alt!=null?` · alt. ${gF(p.alt,1)} m`:""}</small>${p.note?`<div>${esc(p.note)}</div>`:""}<a href="https://www.google.com/maps?q=${p.lat},${p.lon}" target="_blank" rel="noopener" style="color:var(--ac)">Abrir no Google Maps</a> · <button class="lnk" style="padding:0;font-size:14px" onclick="gEdit('${p.id}')">Editar</button> · <button class="lnk" style="color:var(--er);padding:0;font-size:14px" onclick="askDelP('${p.id}')">Excluir ponto</button></div>`).join("")+(pts.length?"":`<p class="mut" style="margin:6px 0 0">Nenhum ponto neste grupo.</p>`)+`</div>`}
+function gEdit(id){const i=S.points.findIndex(p=>p.id==id),p=S.points[i];$("#p_"+id).innerHTML=`<label>Nome do ponto<input id="en" value="${esc(pName(p,i))}"></label><label>Grupo<select id="eg">${S.groups.map(g=>`<option value="${g.id}" ${g.id==p.gid?"selected":""}>${esc(g.name)}</option>`).join("")}</select></label><label>Anotações<textarea id="eo" rows="2" ${TA}>${esc(p.note||"")}</textarea></label><div class="row"><button class="sm" style="background:var(--mut)" onclick="gList()">Cancelar</button><button class="sm" onclick="gEditSave('${id}')">Salvar</button></div>`}
+function gEditSave(id){const p=S.points.find(x=>x.id==id);p.name=$("#en").value.trim();p.note=$("#eo").value.trim();p.gid=$("#eg").value;save();gList();gDraw()}
+const gd=()=>{const d=new Date();return d.getFullYear()+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0")};
+const qc=s=>'"'+String(s==null?"":s).replace(/"/g,'""')+'"',xe=s=>String(s==null?"":s).replace(/[<>&"]/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;"}[c]));
+function crc32(u){let t=crc32.t;if(!t){t=crc32.t=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}}let r=-1;for(let i=0;i<u.length;i++)r=t[(r^u[i])&255]^(r>>>8);return(r^-1)>>>0}
+function zipStore(files){const te=new TextEncoder(),parts=[],cen=[];let off=0;const d=new Date(),dt=((d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1))&0xFFFF,dd=(((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate())&0xFFFF;
+ files.forEach(([name,data])=>{const nb=te.encode(name),c=crc32(data),h=new DataView(new ArrayBuffer(30));h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint16(10,dt,true);h.setUint16(12,dd,true);h.setUint32(14,c,true);h.setUint32(18,data.length,true);h.setUint32(22,data.length,true);h.setUint16(26,nb.length,true);parts.push(new Uint8Array(h.buffer),nb,data);
+  const e=new DataView(new ArrayBuffer(46));e.setUint32(0,0x02014b50,true);e.setUint16(4,20,true);e.setUint16(6,20,true);e.setUint16(8,0x0800,true);e.setUint16(12,dt,true);e.setUint16(14,dd,true);e.setUint32(16,c,true);e.setUint32(20,data.length,true);e.setUint32(24,data.length,true);e.setUint16(28,nb.length,true);e.setUint32(42,off,true);cen.push(new Uint8Array(e.buffer),nb);off+=30+nb.length+data.length});
+ const csz=cen.reduce((s,a)=>s+a.length,0),en=new DataView(new ArrayBuffer(22));en.setUint32(0,0x06054b50,true);en.setUint16(8,files.length,true);en.setUint16(10,files.length,true);en.setUint32(12,csz,true);en.setUint32(16,off,true);
+ return new Blob([...parts,...cen,new Uint8Array(en.buffer)],{type:"application/zip"})}
+function mkDbf(pts){const te=new TextEncoder(),Fd=[["NOME","C",50,0],["LAT","N",13,7],["LON","N",13,7],["PREC_M","N",8,1],["ALT_M","N",9,1],["DATA","C",20,0],["NOTA","C",120,0]];
+ const rl=1+Fd.reduce((s,f)=>s+f[2],0),hl=33+32*Fd.length,buf=new Uint8Array(hl+rl*pts.length+1),dv=new DataView(buf.buffer),d=new Date();
+ buf[0]=3;buf[1]=d.getFullYear()-1900;buf[2]=d.getMonth()+1;buf[3]=d.getDate();dv.setUint32(4,pts.length,true);dv.setUint16(8,hl,true);dv.setUint16(10,rl,true);
+ Fd.forEach((f,i)=>{const o=32+32*i;te.encode(f[0]).forEach((b,j)=>buf[o+j]=b);buf[o+11]=f[1].charCodeAt(0);buf[o+16]=f[2];buf[o+17]=f[3]});buf[32+32*Fd.length]=13;
+ const put=(o,s,len,right)=>{let b=te.encode(String(s));if(b.length>len)b=b.slice(0,len);buf.fill(32,o,o+len);buf.set(b,right?o+len-b.length:o)};
+ pts.forEach((p,r)=>{let o=hl+r*rl;buf[o++]=32;const v=[p.name,p.lat.toFixed(7),p.lon.toFixed(7),p.acc==null?"":p.acc.toFixed(1),p.alt==null?"":p.alt.toFixed(1),new Date(p.ts).toISOString().slice(0,19).replace("T"," "),p.note||""];Fd.forEach((f,i)=>{put(o,v[i],f[2],f[1]=="N");o+=f[2]})});
+ buf[buf.length-1]=26;return buf}
+function mkShp(pts){const n=pts.length,shp=new Uint8Array(100+28*n),sv=new DataView(shp.buffer),shx=new Uint8Array(100+8*n),xv=new DataView(shx.buffer),xs=pts.map(p=>p.lon),ys=pts.map(p=>p.lat),bb=[Math.min(...xs),Math.min(...ys),Math.max(...xs),Math.max(...ys)];
+ const head=(dv,len)=>{dv.setInt32(0,9994,false);dv.setInt32(24,len/2,false);dv.setInt32(28,1000,true);dv.setInt32(32,1,true);bb.forEach((v,i)=>dv.setFloat64(36+8*i,v,true))};head(sv,shp.length);head(xv,shx.length);
+ pts.forEach((p,i)=>{const o=100+28*i;sv.setInt32(o,i+1,false);sv.setInt32(o+4,10,false);sv.setInt32(o+8,1,true);sv.setFloat64(o+12,p.lon,true);sv.setFloat64(o+20,p.lat,true);xv.setInt32(100+8*i,o/2,false);xv.setInt32(104+8*i,10,false)});
+ const te=new TextEncoder(),wkt='GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]]';
+ return zipStore([["pontos.shp",shp],["pontos.shx",shx],["pontos.dbf",mkDbf(pts)],["pontos.prj",te.encode(wkt)],["pontos.cpg",te.encode("UTF-8")]])}
+function mkLista(pts){const g=mkPdf();let pg=0,y;const hdr=()=>{g.page();pg++;y=44;if(pg==1){g.text(36,y,"Relatório de pontos coletados",16,1,"#065f46");y+=15;g.text(36,y,`Datum WGS84 - coordenadas em graus decimais - ${pts.length} ponto(s) - gerado em ${new Date().toLocaleString("pt-BR")}`,9,0,"#444444");y+=8;g.line(36,y,559,y,"#10b981",1);y+=18}
+ g.rect(36,y-11,523,16,"#d1fae5");g.text(44,y,"Nome do ponto",10,1);g.text(300,y,"Latitude",10,1);g.text(430,y,"Longitude",10,1);y+=18};
+ hdr();pts.forEach((p,i)=>{if(y>800)hdr();if(i%2)g.rect(36,y-10,523,15,"#f3f4f6");g.text(44,y,String(p.name).slice(0,42),10);g.text(300,y,p.lat.toFixed(7),10);g.text(430,y,p.lon.toFixed(7),10);y+=15});return g.finish()}
+async function gExp(k){const pts=gSet(),m=$("#gexm"),say=s=>{if(m)m.textContent=s};if(!pts.length)return say("Nenhum ponto para exportar.");
+ const f=n=>n.toFixed(7),dc=n=>n.toFixed(7).replace(".",","),D=gd();let r;
+ try{if(k=="csv")r=await dl(`pontos-${D}.csv`,"\ufeff"+["nome,latitude,longitude,precisao_m,altitude_m,data_hora,anotacoes",...pts.map(p=>[qc(p.name),f(p.lat),f(p.lon),p.acc==null?"":p.acc.toFixed(1),p.alt==null?"":p.alt.toFixed(1),qc(new Date(p.ts).toISOString()),qc(p.note)].join(","))].join("\r\n"));
+ else if(k=="lcsv")r=await dl(`lista-pontos-${D}.csv`,"\ufeff"+["Nome;Latitude;Longitude",...pts.map(p=>[qc(p.name),dc(p.lat),dc(p.lon)].join(";"))].join("\r\n"));
+ else if(k=="kml")r=await dl(`pontos-${D}.kml`,`<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>Pontos coletados</name>${pts.map(p=>`<Placemark><name>${xe(p.name)}</name><description>${xe((p.note?p.note+" | ":"")+(p.acc==null?"marcado no mapa":"precisão ± "+gF(p.acc,1)+" m")+" | "+new Date(p.ts).toLocaleString("pt-BR"))}</description><Point><coordinates>${f(p.lon)},${f(p.lat)},${p.alt!=null?p.alt.toFixed(1):0}</coordinates></Point></Placemark>`).join("")}</Document></kml>`);
+ else if(k=="shp")r=await dl(`pontos-${D}-shp.zip`,mkShp(pts));
+ else r=await dl(`lista-pontos-${D}.pdf`,mkLista(pts))}catch(e){r="erro"}
+ say(r=="ok"?`Arquivo gerado (${pts.length} ponto(s)).`:r=="declined"?"Cancelado.":"Não foi possível salvar o arquivo.")}
+function newTest(mid){const l=S.tests.filter(t=>t.mid==mid&&t.tipo!=="A").slice(-1)[0]||{};
+ draft={mid,n:l.n||11,product:l.product||S.products[0],rate:l.rate||"",width:l.width||"",rpm:"",wind:"",adj:{},v:[]};
+ draft.v=Array(draft.n).fill("");drawTest()}
+function inp(l,k){return`<label>${l}<input type="number" step="any" inputmode="decimal" value="${draft[k]}" oninput="draft.${k}=this.value;calc()"></label>`}
+function drawTest(){const m=M(draft.mid),D=draft;
+ app.innerHTML=`<button class="lnk" onclick="go('machine','${m.id}')">‹ ${esc(m.fleet)}</button><h2>Teste de bandeja</h2>
+<div class="card"><div class="g2"><label>Nº de bandejas<select onchange="setN(+this.value)">${[5,7,9,11,13,15,17,19,21].map(n=>`<option ${n==D.n?"selected":""}>${n}</option>`).join("")}</select></label>
+<label>Produto<select onchange="draft.product=this.value">${S.products.map(p=>`<option ${p==D.product?"selected":""}>${esc(p)}</option>`).join("")}</select></label></div>
+<div class="row"><input id="np" placeholder="Novo produto"><button class="sm" onclick="addP()">+ Produto</button></div>
+<div class="g2">${inp("Taxa alvo (kg/ha)","rate")}${inp("Largura de trabalho (m)","width")}${inp("RPM dos discos","rpm")}${inp("Vento (km/h, opcional)","wind")}</div>
+${m.adj.map(k=>`<label>${AD[k]}<input type="number" step="any" inputmode="decimal" placeholder="ex: -2,5" value="${D.adj[k]??""}" oninput="draft.adj['${k}']=this.value"></label>`).join("")}</div>
+<div class="card"><b>Massa coletada (g)</b><p class="mut" style="margin:2px 0 8px">Da esquerda para a direita, com a máquina no centro.</p><div class="sg">${D.v.map((x,i)=>`<label>B${i+1}<input type="number" step="any" inputmode="decimal" value="${x}" oninput="draft.v[${i}]=this.value;calc()"></label>`).join("")}</div></div>
+<div id="res"></div>`;calc()}
+function setN(n){draft.n=n;draft.v=Array.from({length:n},(_,i)=>draft.v[i]??"");drawTest()}
+function addP(){const v=$("#np").value.trim();if(v&&!S.products.includes(v)){S.products.push(v);save()}if(v)draft.product=v;drawTest()}
+function calc(){const D=draft,el=$("#res");cur=null;
+ const miss=D.v.filter(x=>x==="").length;
+ if(miss)return el.innerHTML=`<p class="mut">Preencha todas as bandejas (${miss} faltando).</p>`;
+ const y=D.v.map(Number),s=st(y),sp=+D.width>0?+D.width/(y.length-1):1,x=y.map((_,i)=>(i-(y.length-1)/2)*sp),o=+D.width>0?ovl(x,y,+D.width):null,main=o?o.cv:s.cv;
+ const mx=Math.max(...y)*1.15||1,bw=300/y.length,my=140-s.m/mx*120;
+ const bars=y.map((t,i)=>`<rect x="${20+i*bw+2}" y="${140-t/mx*120}" width="${bw-4}" height="${t/mx*120}" rx="2" fill="${col(main)}" opacity=".85"/><text x="${20+i*bw+bw/2}" y="154" font-size="9" text-anchor="middle" fill="var(--mut)">${i+1}</text>`).join("");
+ const prev=S.tests.filter(t=>t.mid==D.mid&&t.tipo!=="A").slice(-1)[0],dl=prev?main-prev.main:null;
+ cur={...D,tipo:"S",adj:{...D.adj},v:[...D.v],main,cv:s.cv,mean:s.m,date:new Date().toLocaleDateString("pt-BR"),id:Date.now().toString(36)};
+ el.innerHTML=`<div class="card"><svg viewBox="0 0 340 160" width="100%">${bars}<line x1="20" x2="320" y1="${my}" y2="${my}" stroke="var(--ink)" stroke-dasharray="5 4"/><text x="320" y="${my-4}" font-size="10" text-anchor="end" fill="var(--ink)">média ${F(s.m)} g</text></svg></div>
+<div class="card" style="border:2px solid ${col(main)}"><small>${o?`CV COM SOBREPOSIÇÃO (faixa de ${D.width} m)`:"CV DO PERFIL (informe a largura de trabalho para simular a sobreposição)"}</small><div class="big" style="color:${col(main)}">${F(main,2)}%</div>
+<small>${main<=10?"Excelente (até 10%)":main<=15?"Aceitável (10% a 15%)":"Alta variabilidade (acima de 15%)"}</small>
+${o?`<p style="margin:8px 0 0">CV do perfil das bandejas: <b>${F(s.cv,2)}%</b></p>`:""}
+<p style="margin:4px 0 0">Média: <b>${F(s.m)} g</b> · Desvio padrão: <b>${F(s.sd)} g</b></p>
+${dl!==null?`<p style="margin:4px 0 0">Teste anterior: ${F(prev.main,2)}% → <b style="color:${dl<=0?"var(--ok)":"var(--er)"}">${dl<=0?"melhorou":"piorou"} ${F(Math.abs(dl),2)} p.p.</b></p>`:""}</div>
+<button class="btn" onclick="saveT()">Salvar teste no histórico</button>`}
+function saveT(){if(!cur)return;S.tests.push(cur);save();go("machine",cur.mid)}
+migFields();home();
+</script><script>(function(){if(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)return;var el=document.createElement("div");el.style.cssText="font:12px system-ui,sans-serif;text-align:center;padding:14px;color:#94a3b8";document.body.appendChild(el);var dp=null,sw="verificando",mf="verificando";
+function draw(){el.innerHTML="Instalação: manifesto "+mf+" · service worker "+sw+" · instalável pelo Chrome: "+(dp?"sim":"ainda não")+(dp?'<br><button id="ibtn" style="margin-top:8px;padding:10px 16px;border:0;border-radius:10px;background:#10b981;color:#fff;font-weight:700;font-size:15px">Instalar app</button>':"");var b=document.getElementById("ibtn");if(b)b.onclick=function(){dp.prompt();dp.userChoice.then(function(){dp=null;draw()})}}
+window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();dp=e;draw()});window.addEventListener("appinstalled",function(){el.remove()});
+(window.fetch?fetch("manifest.webmanifest"):Promise.reject()).then(function(r){mf=r.ok?"ok":"erro "+r.status;draw()}).catch(function(){mf="erro";draw()});
+if("serviceWorker"in navigator&&location.protocol.indexOf("http")==0){navigator.serviceWorker.register("sw.js").then(function(){return navigator.serviceWorker.ready}).then(function(){sw="ativo";draw()}).catch(function(){sw="erro";draw()})}else{sw="indisponível";draw()}draw()})();</script></body></html>
