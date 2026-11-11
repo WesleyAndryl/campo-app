@@ -46,7 +46,7 @@ input,select{width:100%;box-sizing:border-box;font-size:16px;padding:10px;margin
 let S;try{S=JSON.parse(localStorage.getItem("campo_v1"))}catch(e){}
 S=S||{brands:["RoGator","John Deere","Case IH","Jacto","New Holland","Stara"],products:["Super Simples","MAP","KCl","Ureia","Calcário"],machines:[],tests:[]};
 const save=()=>{try{localStorage.setItem("campo_v1",JSON.stringify(S))}catch(e){}};
-S.points=S.points||[];S.groups=S.groups||[];
+S.points=S.points||[];S.groups=S.groups||[];S.clients=S.clients||[];S.farms=S.farms||[];S.fields=S.fields||[];S.safras=S.safras||[];S.cultivos=S.cultivos||[];S.crops=S.crops||["Soja","Milho","Algodão","Feijão","Sorgo","Milheto","Trigo"];
 if(S.points.some(p=>!p.gid)){let g=S.groups.find(x=>x.id=="g0");if(!g){g={id:"g0",name:"Sem grupo"};S.groups.push(g)}S.points.forEach(p=>{if(!p.gid)p.gid="g0"});save()}
 const $=s=>document.querySelector(s),app=$("#app");
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -55,14 +55,14 @@ const AD={disco:"Discos (cm)",bica:"Bica / ponto de queda (unitário, aceita neg
 const col=c=>c<=10?"var(--ok)":c<=15?"var(--wa)":"var(--er)";
 const M=id=>S.machines.find(m=>m.id==id);
 let draft=null,cur=null;
-function go(n,p){stopGPS();const mm=document.getElementById("pm");if(mm)mm.remove();document.body.style.overflow="";window.scrollTo(0,0);({home,fert,pontos,plista,pgrupo,backup,form,machine,test:newTest}[n])(p)}
+function go(n,p){stopGPS();const mm=document.getElementById("pm");if(mm)mm.remove();document.body.style.overflow="";window.scrollTo(0,0);({home,fert,pontos,plista,pgrupo,cli,cform,cliente,fform,fazenda,tform,sform,safra,cult,backup,form,machine,test:newTest}[n])(p)}
 function st(a){const n=a.length,m=a.reduce((x,y)=>x+y,0)/n,sd=Math.sqrt(a.reduce((s,v)=>s+(v-m)**2,0)/(n-1));return{m,sd,cv:m>0?sd/m*100:0}}
 function ovl(x,y,W){if(!(W>0)||x.length<2)return null;
  const f=p=>{if(p<x[0]||p>x[x.length-1])return 0;let i=1;while(p>x[i])i++;const t=(p-x[i-1])/(x[i]-x[i-1]);return y[i-1]+t*(y[i]-y[i-1])};
  const K=Math.ceil(Math.max(Math.abs(x[0]),x[x.length-1])/W)+1,a=[];
  for(let p=0;p<W;p+=W/200){let s=0;for(let k=-K;k<=K;k++)s+=f(p+k*W);a.push(s)}
  return st(a)}
-function home(){app.innerHTML=`<h1>🌾 Campo</h1><div class="tiles"><div class="tile" onclick="go('fert')"><svg viewBox="0 0 64 64"><path d="M16 10h32l-7 22H23z"/><ellipse cx="32" cy="39" rx="11" ry="3.5"/><path d="M32 32v3.5"/><circle cx="12" cy="50" r="2" fill="var(--ac)"/><circle cx="22" cy="55" r="2" fill="var(--ac)"/><circle cx="32" cy="57" r="2" fill="var(--ac)"/><circle cx="42" cy="55" r="2" fill="var(--ac)"/><circle cx="52" cy="50" r="2" fill="var(--ac)"/></svg><b>Teste de distribuição de fertilizantes</b></div><div class="tile" onclick="go('pontos')"><svg viewBox="0 0 64 64"><path d="M32 6c-9.5 0-16 6.5-16 15 0 11 16 28 16 28s16-17 16-28c0-8.500-6.500-15-16-15z"/><circle cx="32" cy="21" r="5.500"/><ellipse cx="32" cy="56" rx="16" ry="4"/></svg><b>Coleta de pontos e amostras</b></div></div><button class="btn" style="background:var(--card);color:var(--ink);border:1px solid var(--line)" onclick="go('backup')">Backup dos dados</button>`}
+function home(){app.innerHTML=`<h1>🌾 Campo</h1><div class="tiles"><div class="tile" onclick="go('fert')"><svg viewBox="0 0 64 64"><path d="M16 10h32l-7 22H23z"/><ellipse cx="32" cy="39" rx="11" ry="3.5"/><path d="M32 32v3.5"/><circle cx="12" cy="50" r="2" fill="var(--ac)"/><circle cx="22" cy="55" r="2" fill="var(--ac)"/><circle cx="32" cy="57" r="2" fill="var(--ac)"/><circle cx="42" cy="55" r="2" fill="var(--ac)"/><circle cx="52" cy="50" r="2" fill="var(--ac)"/></svg><b>Teste de distribuição de fertilizantes</b></div><div class="tile" onclick="go('pontos')"><svg viewBox="0 0 64 64"><path d="M32 6c-9.5 0-16 6.5-16 15 0 11 16 28 16 28s16-17 16-28c0-8.500-6.500-15-16-15z"/><circle cx="32" cy="21" r="5.500"/><ellipse cx="32" cy="56" rx="16" ry="4"/></svg><b>Coleta de pontos e amostras</b></div><div class="tile" onclick="go('cli')"><svg viewBox="0 0 64 64"><rect x="8" y="12" width="48" height="40" rx="5"/><path d="M8 29h48M24 12v17M42 29v23M24 40h18"/></svg><b>Clientes, fazendas e talhões</b></div></div><button class="btn" style="background:var(--card);color:var(--ink);border:1px solid var(--line)" onclick="go('backup')">Backup dos dados</button>`}
 let gon=false,gw=null,gp=null,gerr="",coll=null,gt=null,gst="";
 const gF=(v,d)=>v==null||!isFinite(v)?"–":v.toFixed(d);
 function stopGPS(){try{if(gw!==null&&navigator.geolocation)navigator.geolocation.clearWatch(gw)}catch(e){}gw=null;gon=false;clearTimeout(gt)}
@@ -247,10 +247,87 @@ async function pdfT(id){const t=S.tests.find(x=>x.id==id),pm=$("#pm_"+id),say=s=
    g.text(36,y,"Contorno = região usada no CV  |  linha tracejada = dose média  |  verde = distribuição no solo",8,0,"#555555")}
   const nm=`teste-${m.fleet}-${isA?"adulanco":"s"}-${String(t.date).replace(/\//g,"-")}`.replace(/[^A-Za-z0-9-]/g,"")+".pdf",res=await dl(nm,g.finish());
   say(res=="ok"?"PDF gerado.":res=="declined"?"Cancelado.":"Não foi possível salvar o PDF.")}catch(e){say("Não foi possível gerar o PDF.")}}
+const srt=(a,k)=>[...a].sort((x,y)=>String(x[k]).localeCompare(String(y[k]),"pt-BR",{numeric:true,sensitivity:"base"}));
+const fmtD=d=>d?d.split("-").reverse().join("/"):"";
+const farmsOf=cid=>S.farms.filter(f=>f.cid==cid),fieldsOf=fid=>S.fields.filter(t=>t.fid==fid);
+const haSum=a=>a.reduce((s,t)=>s+(+t.area||0),0),fmHa=v=>(+v).toLocaleString("pt-BR",{maximumFractionDigits:2})+" ha";
+const bk=(on,t)=>`<button class="lnk" onclick="${on}">‹ ${t}</button>`;
+function cli(){app.innerHTML=bk("go('home')","Início")+`<h2>Clientes, fazendas e talhões</h2>`+(S.clients.length?srt(S.clients,"name").map(c=>{const fs=farmsOf(c.id),n=fs.reduce((s,f)=>s+fieldsOf(f.id).length,0);return`<div class="card tap" onclick="go('cliente','${c.id}')"><b>${esc(c.name)}</b><br><small>${fs.length} fazenda(s) · ${n} talhão(ões)</small></div>`}).join(""):`<p class="mut">Nenhum cliente cadastrado.</p>`)+`<button class="btn" onclick="go('cform','')">+ Adicionar cliente</button>`}
+function cform(id){const c=id?S.clients.find(x=>x.id==id):null;
+ app.innerHTML=bk(c?`go('cliente','${id}')`:"go('cli')","Voltar")+`<h2>${c?"Editar cliente":"Novo cliente"}</h2><label>Nome do cliente<input id="cn" value="${esc(c?c.name:"")}"></label><label>Observações (contato, etc.)<textarea id="co" rows="3" ${TA}>${esc(c?c.note||"":"")}</textarea></label><p id="err" style="color:var(--er)"></p><button class="btn" onclick="saveC('${id||""}')">Salvar cliente</button>`}
+function saveC(id){const name=$("#cn").value.trim(),note=$("#co").value.trim();if(!name){$("#err").textContent="Informe o nome do cliente.";return}
+ if(id){const c=S.clients.find(x=>x.id==id);c.name=name;c.note=note}else{id=Date.now().toString(36);S.clients.push({id,name,note})}save();go("cliente",id)}
+function cliente(id){const c=S.clients.find(x=>x.id==id);if(!c)return cli();const fs=srt(farmsOf(id),"name");
+ app.innerHTML=bk("go('cli')","Clientes")+`<h2>${esc(c.name)}</h2>`+(c.note?`<p class="mut" style="margin:0 0 6px">${esc(c.note)}</p>`:"")+`<div><button class="lnk" style="padding:2px 0;font-size:14px" onclick="go('cform','${id}')">Editar cliente</button></div><h3>Fazendas</h3>`+
+ (fs.length?fs.map(f=>{const ts=fieldsOf(f.id);return`<div class="card tap" onclick="go('fazenda','${f.id}')"><b>${esc(f.name)}</b>${f.city?` · ${esc(f.city)}`:""}<br><small>${ts.length} talhão(ões) · ${fmHa(haSum(ts))}</small></div>`}).join(""):`<p class="mut">Nenhuma fazenda cadastrada.</p>`)+
+ `<button class="btn" onclick="go('fform','${id}|')">+ Adicionar fazenda</button><div id="del" style="margin-top:24px"><button class="lnk" style="color:var(--er)" onclick="askDelC('${id}')">Excluir cliente</button></div>`}
+function askDelC(id){const fs=farmsOf(id),n=fs.reduce((x,f)=>x+fieldsOf(f.id).length,0),m=fs.reduce((x,f)=>x+S.safras.filter(q=>q.fid==f.id).length,0);$("#del").innerHTML=`<div class="card" style="border-color:var(--er)">Excluir este cliente${fs.length?` e suas ${fs.length} fazenda(s)${n?`, ${n} talhão(ões)`:""}${m?` e ${m} safra(s)`:""}`:""}? Não dá para desfazer.<div class="row" style="margin-top:8px"><button class="sm" style="background:var(--mut)" onclick="cliente('${id}')">Cancelar</button><button class="sm" style="background:var(--er)" onclick="delC('${id}')">Excluir</button></div></div>`}
+function rmFarm(fid){const ss=S.safras.filter(q=>q.fid==fid).map(q=>q.id);S.cultivos=S.cultivos.filter(c=>!ss.includes(c.sid));S.safras=S.safras.filter(q=>q.fid!=fid);S.fields=S.fields.filter(t=>t.fid!=fid);S.farms=S.farms.filter(f=>f.id!=fid)}
+function delC(id){farmsOf(id).map(f=>f.id).forEach(rmFarm);S.clients=S.clients.filter(c=>c.id!=id);save();go("cli")}
+function fform(p){const[cid,fid]=p.split("|"),f=fid?S.farms.find(x=>x.id==fid):null;
+ app.innerHTML=bk(f?`go('fazenda','${fid}')`:`go('cliente','${cid}')`,"Voltar")+`<h2>${f?"Editar fazenda":"Nova fazenda"}</h2><label>Nome da fazenda<input id="fn" value="${esc(f?f.name:"")}"></label><label>Município / UF<input id="fc" placeholder="Ex.: Sorriso / MT" value="${esc(f?f.city||"":"")}"></label><label>Observações<textarea id="fo" rows="3" ${TA}>${esc(f?f.note||"":"")}</textarea></label><p id="err" style="color:var(--er)"></p><button class="btn" onclick="saveF('${cid}','${fid||""}')">Salvar fazenda</button>`}
+function saveF(cid,fid){const name=$("#fn").value.trim(),city=$("#fc").value.trim(),note=$("#fo").value.trim();if(!name){$("#err").textContent="Informe o nome da fazenda.";return}
+ if(fid){const f=S.farms.find(x=>x.id==fid);f.name=name;f.city=city;f.note=note}else{fid=Date.now().toString(36);S.farms.push({id:fid,cid,name,city,note})}save();go("fazenda",fid)}
+const sfOf=fid=>S.safras.filter(q=>q.fid==fid).sort((x,y)=>(y.start||"").localeCompare(x.start||"")||y.name.localeCompare(x.name,"pt-BR",{numeric:true}));
+const per=q=>`${fmtD(q.start)||"–"} a ${fmtD(q.end)||"–"}`;
+const cvOf=(sid,tid)=>S.cultivos.find(c=>c.sid==sid&&c.tid==tid);
+const cvTxt=c=>c&&c.crop?[c.crop,c.variety].filter(Boolean).map(esc).join(" · "):"sem cultura";
+function resumo(q){const m={};S.cultivos.filter(c=>c.sid==q.id&&c.crop).forEach(c=>{const t=S.fields.find(x=>x.id==c.tid);if(!t)return;const o=m[c.crop]=m[c.crop]||{ha:0};o.ha+=+t.area||0});return Object.entries(m).sort((x,y)=>y[1].ha-x[1].ha).map(([k,o])=>`${esc(k)} ${fmHa(o.ha)}`).join(" · ")}
+function fazenda(id){const f=S.farms.find(x=>x.id==id);if(!f)return cli();const c=S.clients.find(x=>x.id==f.cid),ts=srt(fieldsOf(id),"name"),ss=sfOf(id),ls=ss[0];
+ app.innerHTML=bk(`go('cliente','${f.cid}')`,esc(c?c.name:"Cliente"))+`<h2>${esc(f.name)}</h2>`+(f.city?`<p class="mut" style="margin:0">${esc(f.city)}</p>`:"")+(f.note?`<p class="mut" style="margin:4px 0">${esc(f.note)}</p>`:"")+`<div><button class="lnk" style="padding:2px 0;font-size:14px" onclick="go('fform','${f.cid}|${id}')">Editar fazenda</button></div>
+<div class="card"><small>TOTAL DA FAZENDA</small><div style="margin-top:4px"><b>${ts.length}</b> talhão(ões) · <b>${fmHa(haSum(ts))}</b></div></div>
+<h3>Safras</h3>`+(ss.length?ss.map(q=>`<div class="card tap" onclick="go('safra','${q.id}')"><b>Safra ${esc(q.name)}</b><br><small>${per(q)}</small>${resumo(q)?`<br><small>${resumo(q)}</small>`:""}</div>`).join(""):`<p class="mut">Nenhuma safra cadastrada.</p>`)+`<button class="btn" onclick="go('sform','${id}|')">+ Nova safra</button>
+<h3>Talhões</h3>`+
+ (ts.length?ts.map(t=>`<div class="card" id="ft_${t.id}"><b>${esc(t.name)}</b>${t.area!==""&&t.area!=null?` · ${fmHa(t.area)}`:""}${ls?`<br><small>Safra ${esc(ls.name)}: ${cvTxt(cvOf(ls.id,t.id))}</small>`:""}${t.note?`<div class="mut" style="font-size:14px">${esc(t.note)}</div>`:""}<div><button class="lnk" style="padding:2px 0;font-size:14px" onclick="go('tform','${id}|${t.id}')">Editar</button> · <button class="lnk" style="color:var(--er);padding:2px 0;font-size:14px" onclick="askDelFT('${t.id}')">Excluir</button></div></div>`).join(""):`<p class="mut">Nenhum talhão cadastrado.</p>`)+
+ `<button class="btn" onclick="go('tform','${id}|')">+ Adicionar talhão</button><div id="del" style="margin-top:24px"><button class="lnk" style="color:var(--er)" onclick="askDelF('${id}')">Excluir fazenda</button></div>`}
+function askDelF(id){const n=fieldsOf(id).length,m=S.safras.filter(q=>q.fid==id).length;$("#del").innerHTML=`<div class="card" style="border-color:var(--er)">Excluir esta fazenda${n||m?` com ${[n?n+" talhão(ões)":"",m?m+" safra(s)":""].filter(Boolean).join(" e ")}`:""}? Não dá para desfazer.<div class="row" style="margin-top:8px"><button class="sm" style="background:var(--mut)" onclick="fazenda('${id}')">Cancelar</button><button class="sm" style="background:var(--er)" onclick="delF('${id}')">Excluir</button></div></div>`}
+function delF(id){const f=S.farms.find(x=>x.id==id);rmFarm(id);save();go("cliente",f.cid)}
+function askDelFT(id){const t=S.fields.find(x=>x.id==id);$("#ft_"+id).innerHTML=`<b style="color:var(--er)">Excluir este talhão?</b><br>O talhão e as culturas dele nas safras não poderão ser recuperados.<div class="row" style="margin-top:8px"><button class="sm" style="background:var(--mut)" onclick="fazenda('${t.fid}')">Cancelar</button><button class="sm" style="background:var(--er)" onclick="delFT('${id}')">Excluir talhão</button></div>`}
+function delFT(id){const t=S.fields.find(x=>x.id==id);S.fields=S.fields.filter(x=>x.id!=id);S.cultivos=S.cultivos.filter(c=>c.tid!=id);save();fazenda(t.fid)}
+let TD=null;
+function tform(p){const[fid,tid]=p.split("|"),t=tid?S.fields.find(x=>x.id==tid):null;
+ TD=t?{id:t.id,fid,name:t.name,area:t.area==null?"":t.area,note:t.note||""}:{id:"",fid,name:"",area:"",note:""};drawTF()}
+function drawTF(){const f=S.farms.find(x=>x.id==TD.fid);
+ app.innerHTML=bk(`go('fazenda','${TD.fid}')`,esc(f.name))+`<h2>${TD.id?"Editar talhão":"Novo talhão"}</h2>
+<label>Nome do talhão<input value="${esc(TD.name)}" oninput="TD.name=this.value" placeholder="Ex.: T-01"></label>
+<label>Área (ha)<input type="number" step="any" inputmode="decimal" value="${TD.area}" oninput="TD.area=this.value"></label>
+<label>Observações<textarea rows="3" ${TA} oninput="TD.note=this.value">${esc(TD.note||"")}</textarea></label><p class="mut" style="font-size:13px;margin:0">A cultura e a variedade de cada safra são informadas dentro da safra da fazenda.</p><p id="err" style="color:var(--er)"></p><button class="btn" onclick="saveTF()">Salvar talhão</button>`}
+function saveTF(){const err=s=>{$("#err").textContent=s},n=TD.name.trim();if(!n)return err("Informe o nome do talhão.");
+ const a=String(TD.area).trim().replace(",","."),ar=a===""?"":+a;if(a!==""&&(!isFinite(ar)||ar<0))return err("Informe uma área válida em hectares.");
+ const o={id:TD.id||nid(),fid:TD.fid,name:n,area:ar,note:(TD.note||"").trim()};
+ if(TD.id)S.fields[S.fields.findIndex(x=>x.id==TD.id)]=o;else S.fields.push(o);save();go("fazenda",TD.fid)}
+let _id=0;const nid=()=>Date.now().toString(36)+(_id++).toString(36);
+function sform(p){const[fid,sid]=p.split("|"),q=sid?S.safras.find(x=>x.id==sid):null,d=new Date(),y=d.getMonth()>=6?d.getFullYear():d.getFullYear()-1,def=y+"/"+String(y+1).slice(2);
+ app.innerHTML=bk(q?`go('safra','${sid}')`:`go('fazenda','${fid}')`,"Voltar")+`<h2>${q?"Editar safra":"Nova safra"}</h2><label>Nome da safra<input id="sn" value="${esc(q?q.name:def)}" placeholder="Ex.: 2026/27"></label><div class="g2"><label>Início da safra<input id="s1" type="date" value="${q?q.start:""}"></label><label>Fim da safra<input id="s2" type="date" value="${q?q.end:""}"></label></div><label>Observações<textarea id="so" rows="3" ${TA}>${esc(q?q.note||"":"")}</textarea></label><p id="err" style="color:var(--er)"></p><button class="btn" onclick="saveS('${fid}','${sid||""}')">Salvar safra</button>`}
+function saveS(fid,sid){const err=s=>{$("#err").textContent=s},name=$("#sn").value.trim(),start=$("#s1").value,end=$("#s2").value,note=$("#so").value.trim();
+ if(!name)return err("Informe o nome da safra.");if(start&&end&&end<start)return err("A data final da safra não pode ser anterior à data inicial.");
+ if(S.safras.some(x=>x.fid==fid&&x.id!=sid&&x.name.toLowerCase()==name.toLowerCase()))return err("Já existe uma safra com esse nome nesta fazenda.");
+ if(sid){const q=S.safras.find(x=>x.id==sid);Object.assign(q,{name,start,end,note})}else{sid=nid();S.safras.push({id:sid,fid,name,start,end,note})}save();go("safra",sid)}
+function safra(id){const q=S.safras.find(x=>x.id==id);if(!q)return cli();const f=S.farms.find(x=>x.id==q.fid),ts=srt(fieldsOf(q.fid),"name");
+ app.innerHTML=bk(`go('fazenda','${q.fid}')`,esc(f.name))+`<h2>Safra ${esc(q.name)}</h2><p class="mut" style="margin:0">${per(q)}</p>`+(q.note?`<p class="mut" style="margin:4px 0">${esc(q.note)}</p>`:"")+`<div><button class="lnk" style="padding:2px 0;font-size:14px" onclick="go('sform','${q.fid}|${id}')">Editar safra</button></div>
+<div class="card"><small>RESUMO DA SAFRA</small><div style="margin-top:4px">${resumo(q)||"Nenhuma cultura informada."}</div></div><h3>Culturas por talhão</h3>`+
+ (ts.length?ts.map(t=>`<div class="card"><b>${esc(t.name)}</b>${t.area!==""&&t.area!=null?` · ${fmHa(t.area)}`:""}<br><small>${cvTxt(cvOf(id,t.id))}</small></div>`).join("")+`<button class="btn" onclick="go('cult','${id}')">Editar culturas dos talhões</button>`:`<p class="mut">Cadastre os talhões da fazenda para informar as culturas desta safra.</p>`)+
+ `<div id="del" style="margin-top:24px"><button class="lnk" style="color:var(--er)" onclick="askDelS('${id}')">Excluir safra</button></div>`}
+function askDelS(id){const n=S.cultivos.filter(c=>c.sid==id).length;$("#del").innerHTML=`<div class="card" style="border-color:var(--er)">Excluir esta safra${n?` e as culturas de ${n} talhão(ões)`:""}? Não dá para desfazer.<div class="row" style="margin-top:8px"><button class="sm" style="background:var(--mut)" onclick="safra('${id}')">Cancelar</button><button class="sm" style="background:var(--er)" onclick="delS('${id}')">Excluir</button></div></div>`}
+function delS(id){const q=S.safras.find(x=>x.id==id);S.cultivos=S.cultivos.filter(c=>c.sid!=id);S.safras=S.safras.filter(x=>x.id!=id);save();go("fazenda",q.fid)}
+let CD=null;
+function cult(sid){const q=S.safras.find(x=>x.id==sid);CD={sid,r:{}};fieldsOf(q.fid).forEach(t=>{const c=cvOf(sid,t.id);CD.r[t.id]={crop:c?c.crop:"",variety:c?c.variety:""}});drawCD()}
+function drawCD(){const q=S.safras.find(x=>x.id==CD.sid),ts=srt(fieldsOf(q.fid),"name"),y=window.scrollY;Object.values(CD.r).forEach(r=>{if(r.crop&&!S.crops.includes(r.crop))S.crops.push(r.crop)});
+ app.innerHTML=bk(`go('safra','${CD.sid}')`,`Safra ${esc(q.name)}`)+`<h2>Culturas dos talhões</h2><p class="mut" style="margin:0 0 8px">Safra ${esc(q.name)} · ${per(q)}</p><div class="row"><input id="nc" placeholder="Nova cultura"><button class="sm" onclick="addCrop()">+ Cultura</button></div>`+
+ ts.map(t=>`<div class="card" style="margin-top:10px"><b>${esc(t.name)}</b>${t.area!==""&&t.area!=null?` · ${fmHa(t.area)}`:""}<label>Cultura<select onchange="CD.r['${t.id}'].crop=this.value"><option value="">Sem cultura</option>${S.crops.map(c=>`<option ${c==CD.r[t.id].crop?"selected":""}>${esc(c)}</option>`).join("")}</select></label><label>Variedade<input value="${esc(CD.r[t.id].variety)}" oninput="CD.r['${t.id}'].variety=this.value"></label></div>`).join("")+`<p id="err" style="color:var(--er)"></p><button class="btn" onclick="saveCD()">Salvar culturas</button>`;window.scrollTo(0,y)}
+function addCrop(){const v=$("#nc").value.trim();if(v&&!S.crops.includes(v)){S.crops.push(v);save()}drawCD()}
+function saveCD(){const q=S.safras.find(x=>x.id==CD.sid),ts=fieldsOf(q.fid);
+ for(const t of ts){const r=CD.r[t.id];if(r.variety.trim()&&!r.crop){$("#err").textContent=`Talhão ${t.name}: informe a cultura ou apague a variedade.`;return}}
+ S.cultivos=S.cultivos.filter(c=>c.sid!=CD.sid);ts.forEach(t=>{const r=CD.r[t.id];if(r.crop)S.cultivos.push({id:CD.sid+"-"+t.id,sid:CD.sid,tid:t.id,crop:r.crop,variety:r.variety.trim()})});save();go("safra",CD.sid)}
+function migFields(){let ch=false;S.farms.forEach(f=>{const fs=S.fields.filter(t=>t.fid==f.id&&(t.crop||t.variety||t.start||t.end));if(!fs.length)return;const g={};fs.forEach(t=>{const k=(t.start||"")+"|"+(t.end||"");(g[k]=g[k]||[]).push(t)});
+  Object.keys(g).forEach(k=>{const[a,b]=k.split("|");let q=S.safras.find(x=>x.fid==f.id&&(x.start||"")==a&&(x.end||"")==b);
+   if(!q){const y1=a.slice(0,4),y2=b.slice(0,4);let nm=y1&&y2?(y1==y2?y1:y1+"/"+y2.slice(2)):(y1||y2||"Safra importada");const base=nm;let i=2;while(S.safras.some(x=>x.fid==f.id&&x.name==nm))nm=base+" ("+i++ +")";q={id:nid(),fid:f.id,name:nm,start:a,end:b,note:""};S.safras.push(q)}
+   g[k].forEach(t=>{if((t.crop||t.variety)&&!cvOf(q.id,t.id))S.cultivos.push({id:q.id+"-"+t.id,sid:q.id,tid:t.id,crop:t.crop||"",variety:t.variety||""})})});
+  });S.fields.forEach(t=>{["crop","variety","start","end"].forEach(k=>{if(k in t){delete t[k];ch=true}})});if(ch)save()}
 const TA='style="width:100%;box-sizing:border-box;font-size:16px;padding:10px;margin:8px 0;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)"';
-function backup(){const n=[S.machines.length,S.tests.length,(S.points||[]).length];
+function backup(){const n=[S.machines.length,S.tests.length,(S.points||[]).length,S.clients.length,S.farms.length,S.fields.length,S.safras.length];
  app.innerHTML=`<button class="lnk" onclick="go('home')">‹ Início</button><h2>Backup dos dados</h2>
-<div class="card"><b>Exportar</b><p class="mut" style="margin:4px 0 8px">Guarda ${n[0]} equipamento(s), ${n[1]} teste(s) e ${n[2]} ponto(s) em um arquivo.</p><button class="btn" onclick="bExp()">Salvar arquivo de backup</button><button class="btn" style="background:var(--mut)" onclick="bCopy()">Copiar backup como texto</button><p id="bm" class="mut"></p></div>
+<div class="card"><b>Exportar</b><p class="mut" style="margin:4px 0 8px">Guarda ${n[0]} equipamento(s), ${n[1]} teste(s), ${n[2]} ponto(s), ${n[3]} cliente(s), ${n[4]} fazenda(s), ${n[5]} talhão(ões) e ${n[6]} safra(s) em um arquivo.</p><button class="btn" onclick="bExp()">Salvar arquivo de backup</button><button class="btn" style="background:var(--mut)" onclick="bCopy()">Copiar backup como texto</button><p id="bm" class="mut"></p></div>
 <div class="card"><b>Importar</b><p class="mut" style="margin:4px 0 8px">Junta o backup aos dados deste aparelho. O que já existe não é duplicado.</p><input type="file" accept=".json,application/json" onchange="bFile(this)"><textarea id="bt" rows="4" placeholder="Ou cole aqui o texto do backup" ${TA}></textarea><button class="btn" onclick="bImp($('#bt').value)">Importar</button><div id="bm2"></div></div>`}
 const bJson=()=>JSON.stringify({app:"campo",versao:1,data:S});
 async function bExp(){const d=new Date(),r=await dl(`backup-campo-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}.json`,bJson());$("#bm").textContent=r=="ok"?"Arquivo gerado.":r=="declined"?"Cancelado.":"Não foi possível salvar. Use \"Copiar backup como texto\"."}
@@ -264,9 +341,9 @@ function bImp(txt){let o;const out=s=>{$("#bm2").textContent=s};try{o=JSON.parse
  bPend=d;$("#bm2").innerHTML=`<div class="card" style="border:2px solid var(--ac);margin-top:10px"><b>${np} ponto(s) novo(s) neste backup</b><p class="mut" style="margin:4px 0 0">Em qual grupo colocar esses pontos? Escolha um grupo existente ou crie um novo.</p>${grpPicker("bgs","bgn")}<p id="bgm" style="color:var(--er);margin:6px 0 0"></p><div class="row" style="margin-top:8px"><button class="sm" style="background:var(--mut)" onclick="bPend=null;$('#bm2').textContent='Importação cancelada.'">Cancelar</button><button class="sm" onclick="bOk()">Confirmar importação</button></div></div>`}
 function bOk(){if(!bPend)return;const gid=grpResolve("bgs","bgn");if(!gid){$("#bgm").textContent="Informe o nome do novo grupo.";return}const d=bPend;bPend=null;bDo(d,gid)}
 function bDo(d,gid){const add=k=>{S[k]=S[k]||[];const ids=new Set(S[k].map(x=>x.id));let n=0;(d[k]||[]).forEach(x=>{if(x&&!ids.has(x.id)){S[k].push(x);n++}});return n};
- const a=add("machines"),b=add("tests");let c=0;
+ const a=add("machines"),b=add("tests"),cl=add("clients"),fa=add("farms"),ta=add("fields"),sa=add("safras"),cu=add("cultivos");let c=0;
  if(gid){const ids=new Set(S.points.map(x=>x.id));(d.points||[]).forEach(x=>{if(x&&!ids.has(x.id)){S.points.push({...x,gid});ids.add(x.id);c++}})}
- ["brands","products"].forEach(k=>(d[k]||[]).forEach(x=>{if(!S[k].includes(x))S[k].push(x)}));save();$("#bm2").textContent=`Importado: ${a} equipamento(s), ${b} teste(s), ${c} ponto(s).`}
+ ["brands","products","crops"].forEach(k=>(d[k]||[]).forEach(x=>{if(!S[k].includes(x))S[k].push(x)}));migFields();save();$("#bm2").textContent=`Importado: ${a} equipamento(s), ${b} teste(s), ${c} ponto(s), ${cl} cliente(s), ${fa} fazenda(s), ${ta} talhão(ões), ${sa} safra(s).`}
 const mLS=()=>{try{return JSON.parse(localStorage.getItem("campo_map"))||{}}catch(e){return{}}};
 let gmode=mLS().mode||"radar",MV=null,mtl=new Map(),mraf=0,mfollow=true,gpick=false,pk=null,gtl=0,ms=null,msWait=false;
 const IC={
@@ -458,7 +535,7 @@ ${o?`<p style="margin:8px 0 0">CV do perfil das bandejas: <b>${F(s.cv,2)}%</b></
 ${dl!==null?`<p style="margin:4px 0 0">Teste anterior: ${F(prev.main,2)}% → <b style="color:${dl<=0?"var(--ok)":"var(--er)"}">${dl<=0?"melhorou":"piorou"} ${F(Math.abs(dl),2)} p.p.</b></p>`:""}</div>
 <button class="btn" onclick="saveT()">Salvar teste no histórico</button>`}
 function saveT(){if(!cur)return;S.tests.push(cur);save();go("machine",cur.mid)}
-home();
+migFields();home();
 </script><script>(function(){if(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)return;var el=document.createElement("div");el.style.cssText="font:12px system-ui,sans-serif;text-align:center;padding:14px;color:#94a3b8";document.body.appendChild(el);var dp=null,sw="verificando",mf="verificando";
 function draw(){el.innerHTML="Instalação: manifesto "+mf+" · service worker "+sw+" · instalável pelo Chrome: "+(dp?"sim":"ainda não")+(dp?'<br><button id="ibtn" style="margin-top:8px;padding:10px 16px;border:0;border-radius:10px;background:#10b981;color:#fff;font-weight:700;font-size:15px">Instalar app</button>':"");var b=document.getElementById("ibtn");if(b)b.onclick=function(){dp.prompt();dp.userChoice.then(function(){dp=null;draw()})}}
 window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();dp=e;draw()});window.addEventListener("appinstalled",function(){el.remove()});
